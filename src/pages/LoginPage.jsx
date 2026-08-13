@@ -9,18 +9,23 @@ const roleContent = {
   receptionist: {
     title: "Receptionist Login",
     subtitle: "Enter your credentials to manage the front desk",
-    firstField: { label: "Email Address", placeholder: "you@premiumhotel.com", type: "email" },
+    firstField: { label: "Email Address", placeholder: "you@hotel.com", type: "email" },
   },
   admin: {
     title: "Admin Login",
     subtitle: "Enter your credentials to access the dashboard",
-    firstField: { label: "Email Address", placeholder: "admin@premiumhotel.com", type: "email" },
+    firstField: { label: "Email Address", placeholder: "admin@hotel.com", type: "email" },
   },
   bartender: {
     title: "Bar Login",
     subtitle: "Enter your credentials to manage drink inventory",
     firstField: { label: "Name", placeholder: "e.g Patrick", type: "text" },
   },
+  storekeeper: {
+    title: "Store Login",
+    subtitle: "Enter your credentials to manage stock in store",
+    firstField: { label: "Name", placeholder: "e.g Patrick", type: "text" },
+  }
 };
 
 export default function LoginPage() {
@@ -47,6 +52,8 @@ export default function LoginPage() {
       navigate("/reception");
     } else if (role === "bartender") {
       navigate("/bar");
+    } else if (role === "storekeeper") {
+      navigate("/stock/issue");
     } else {
       alert(`The "${role}" area is not built yet — coming in a later batch.`);
     }
@@ -55,10 +62,9 @@ export default function LoginPage() {
   return (
     <div className="login">
       <div className="login__inner">
-        {/* Brand */}
+        {/* Brand — the Ception wordmark replaces the old logo + text pair. */}
         <div className="login__brand">
-          <Logo />
-          <div className="login__brand-name">Premium Hotel</div>
+          <Logo height={28} />
         </div>
 
         {/* Heading */}
@@ -108,7 +114,7 @@ export default function LoginPage() {
         </Link>
       </div>
 
-      <p className="login__footer">© 2026 Premium Hotel. All rights reserved.</p>
+      <p className="login__footer">© 2026 Ception. All rights reserved.</p>
     </div>
   );
 }

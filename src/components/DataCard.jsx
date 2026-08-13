@@ -39,16 +39,6 @@ export default function DataCard({ title, rows, percent }) {
           </tbody>
         </table>
 
-        {/* Progress bar */}
-        <div className="progress">
-          <div className="progress__track">
-            <div className="progress__fill" style={{ width: `${percent}%` }} />
-          </div>
-          <div className="progress__labels">
-            <span>Monthly Target</span>
-            <span>{percent}% Achieved</span>
-          </div>
-        </div>
       </div>
     </section>
   );

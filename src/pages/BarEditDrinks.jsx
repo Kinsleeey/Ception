@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar.jsx";
 import CategoryTabs from "../components/CategoryTabs.jsx";
 import ConfirmModal from "../components/ConfirmModal.jsx";
@@ -7,20 +7,71 @@ import NewCategory from "./NewCategory.jsx";
 import {
   GridIcon, SearchIcon, EditIcon, TrashIcon, PlusIcon,
 } from "../components/icons.jsx";
-import { products, manageCategories, barLocations, barStats } from "../data/barData.js";
+import {
+  getProducts, getBarCategories, deleteProduct,
+} from "../api.js";
 
-// Add/Edit Drinks is the admin-side bar management screen. Adding/editing a
-// product, creating a category, and confirming a delete all open as popups
-// *over* this page (blurred behind them) instead of separate screens.
+const BAR_LOCATIONS = ["Bar 1", "Bar 2", "Lounge"];
+
+// Add/Edit Drinks is the admin-side bar management screen. Products come from
+// the backend; adding/editing/deleting a product and creating a category all
+// open as popups over this page.
 export default function BarEditDrinks() {
-  const [location, setLocation] = useState(barLocations[0]);
-  const [category, setCategory] = useState("All");
-  const [pendingDelete, setPendingDelete] = useState(null); // product awaiting delete confirm
-  const [editing, setEditing] = useState(null);             // product being edited
-  const [modal, setModal] = useState(null);                 // "new" | "category" | null
+  const [location, setLocation] = useState("Bar 1");
+  const [categories, setCategories] = useState([]);
+  const [categoryId, setCategoryId] = useState(null); // null = "All"
 
-  const visible =
-    category === "All" ? products : products.filter((p) => p.category === category);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const [pendingDelete, setPendingDelete] = useState(null);
+  const [editing, setEditing] = useState(null);
+  const [modal, setModal] = useState(null); // "new" | "category" | null
+
+  // Load categories once (for the filter pills + the forms).
+  useEffect(() => {
+    getBarCategories().then(setCategories).catch(() => setCategories([]));
+  }, []);
+
+  // Load products for the current bar + category. Separated so we can refresh
+  // after add/edit/delete.
+  async function loadProducts() {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await getProducts({
+        bar_location: location,
+        category_id: categoryId || undefined,
+      });
+      setProducts(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadProducts();
+  }, [location, categoryId]);
+
+  // Also refresh the category list (in case a new one was just added).
+  async function refreshCategories() {
+    try {
+      setCategories(await getBarCategories());
+    } catch { /* ignore */ }
+  }
+
+  async function handleDelete() {
+    try {
+      await deleteProduct(pendingDelete.id);
+      setPendingDelete(null);
+      await loadProducts();
+    } catch (err) {
+      alert(`Couldn't delete: ${err.message}`);
+    }
+  }
 
   return (
     <div className="dashboard">
@@ -29,33 +80,39 @@ export default function BarEditDrinks() {
       <div className="main">
         <header className="topbar">
           <GridIcon size={22} />
-          <span className="topbar__title">Products</span>
+          <span className="topbar__title">Products — {location}</span>
         </header>
 
         <div className="content">
-          {/* Bar location tabs (reuses the category tab styling) */}
-          <CategoryTabs categories={barLocations} active={location} onChange={setLocation} />
+          {/* Bar location tabs */}
+          <CategoryTabs categories={BAR_LOCATIONS} active={location} onChange={setLocation} />
 
           {/* Stats strip */}
           <div className="stat-strip">
             <span className="stat-strip__item">
-              Total Products <span className="stat-strip__num">{barStats.totalProducts}</span>
+              Total Products <span className="stat-strip__num">{products.length}</span>
             </span>
             <span className="stat-strip__divider" />
             <span className="stat-strip__item">
-              Categories <span className="stat-strip__num">{barStats.categories}</span>
+              Categories <span className="stat-strip__num">{categories.length}</span>
             </span>
           </div>
 
-          {/* Category filter pills + a create-category link at the end */}
+          {/* Category filter pills ("All" + real categories) + create link */}
           <div className="pills-row">
-            {manageCategories.map((cat) => (
+            <button
+              className={categoryId === null ? "filter-pill filter-pill--active" : "filter-pill"}
+              onClick={() => setCategoryId(null)}
+            >
+              All
+            </button>
+            {categories.map((cat) => (
               <button
-                key={cat}
-                className={cat === category ? "filter-pill filter-pill--active" : "filter-pill"}
-                onClick={() => setCategory(cat)}
+                key={cat.id}
+                className={cat.id === categoryId ? "filter-pill filter-pill--active" : "filter-pill"}
+                onClick={() => setCategoryId(cat.id)}
               >
-                {cat}
+                {cat.name}
               </button>
             ))}
             <button className="create-category-link" onClick={() => setModal("category")}>
@@ -63,7 +120,7 @@ export default function BarEditDrinks() {
             </button>
           </div>
 
-          {/* Search */}
+          {/* Search (visual only for now) */}
           <div className="search search--wide">
             <span className="search__icon">
               <SearchIcon size={18} />
@@ -72,34 +129,44 @@ export default function BarEditDrinks() {
           </div>
 
           {/* Product management grid */}
-          <div className="manage-grid">
-            {visible.map((product) => (
-              <div className="manage-card" key={product.name}>
-                <div className="manage-card__info">
-                  <div className="manage-card__name">{product.name}</div>
-                  <span className="manage-card__cat">{product.category}</span>
-                  <div className="manage-card__price-label">Price per unit</div>
-                  <div className="manage-card__price">{product.price}</div>
+          {loading ? (
+            <p style={{ padding: "24px", color: "#7b7487" }}>Loading products…</p>
+          ) : error ? (
+            <p style={{ padding: "24px", color: "#c0392b" }}>Couldn’t load: {error}</p>
+          ) : products.length === 0 ? (
+            <p style={{ padding: "24px", color: "#7b7487" }}>
+              No products in {location}{categoryId ? " for this category" : ""}.
+            </p>
+          ) : (
+            <div className="manage-grid">
+              {products.map((product) => (
+                <div className="manage-card" key={product.id}>
+                  <div className="manage-card__info">
+                    <div className="manage-card__name">{product.name}</div>
+                    <span className="manage-card__cat">{product.category_name || "—"}</span>
+                    <div className="manage-card__price-label">Price per unit</div>
+                    <div className="manage-card__price">₦{Number(product.price).toLocaleString()}</div>
+                  </div>
+                  <div className="manage-card__actions">
+                    <button
+                      className="icon-btn icon-btn--edit"
+                      aria-label={`Edit ${product.name}`}
+                      onClick={() => setEditing(product)}
+                    >
+                      <EditIcon size={18} />
+                    </button>
+                    <button
+                      className="icon-btn icon-btn--delete"
+                      aria-label={`Delete ${product.name}`}
+                      onClick={() => setPendingDelete(product)}
+                    >
+                      <TrashIcon size={18} />
+                    </button>
+                  </div>
                 </div>
-                <div className="manage-card__actions">
-                  <button
-                    className="icon-btn icon-btn--edit"
-                    aria-label={`Edit ${product.name}`}
-                    onClick={() => setEditing(product)}
-                  >
-                    <EditIcon size={18} />
-                  </button>
-                  <button
-                    className="icon-btn icon-btn--delete"
-                    aria-label={`Delete ${product.name}`}
-                    onClick={() => setPendingDelete(product)}
-                  >
-                    <TrashIcon size={18} />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
           {/* Add new product (dashed) */}
           <button className="add-dashed" onClick={() => setModal("new")}>
@@ -108,35 +175,45 @@ export default function BarEditDrinks() {
         </div>
       </div>
 
-      {/* Popups render over this page (blurred behind them). */}
+      {/* Add product */}
       {modal === "new" && (
-        <ProductFormModal mode="new" onClose={() => setModal(null)} />
+        <ProductFormModal
+          mode="new"
+          location={location}
+          categories={categories}
+          onClose={() => setModal(null)}
+          onSaved={async () => { setModal(null); await loadProducts(); }}
+        />
       )}
+
+      {/* Edit product */}
       {editing && (
         <ProductFormModal
           mode="edit"
-          initial={{
-            name: editing.name,
-            category: editing.category,
-            price: String(editing.price).replace(/[₦,]/g, ""),
-            description: "",
-          }}
+          product={editing}
+          location={location}
+          categories={categories}
           onClose={() => setEditing(null)}
+          onSaved={async () => { setEditing(null); await loadProducts(); }}
         />
       )}
-      {modal === "category" && <NewCategory onClose={() => setModal(null)} />}
 
-      {/* Delete confirmation appears on top when a product is pending deletion */}
+      {/* Add category */}
+      {modal === "category" && (
+        <NewCategory
+          onClose={() => setModal(null)}
+          onSaved={async () => { setModal(null); await refreshCategories(); }}
+        />
+      )}
+
+      {/* Delete confirmation */}
       {pendingDelete && (
         <ConfirmModal
           variant="danger"
           title="Delete Product?"
           confirmLabel="Delete"
           onCancel={() => setPendingDelete(null)}
-          onConfirm={() => {
-            alert(`Deleted ${pendingDelete.name}. (Demo — nothing is removed yet.)`);
-            setPendingDelete(null);
-          }}
+          onConfirm={handleDelete}
         >
           You are about to delete <strong>{pendingDelete.name}</strong> from {location}.
           This action cannot be undone.

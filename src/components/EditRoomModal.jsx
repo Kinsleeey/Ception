@@ -1,18 +1,42 @@
 import { useState } from "react";
 import { CloseIcon, ChevronDownIcon } from "./icons.jsx";
 import { CATEGORIES } from "../data/roomsData.js";
+import { updateRoom } from "../api.js";
 
 // Edit Room Details popup. Shows the room number (read-only), a category
-// dropdown, and the price (the highlighted field). It appears as an overlay
-// on top of the Room Details page, which stays blurred behind it.
+// dropdown, and the price. Saving sends the changes to the backend.
 //
 // Props:
-//   room    -> the room being edited { number, category, price }
-//   onClose -> called when the modal should close
-export default function EditRoomModal({ room, onClose }) {
+//   room     -> the room being edited (has id, number, category, price)
+//   onClose  -> close the popup
+//   onSaved  -> called after a successful save (refreshes the list)
+export default function EditRoomModal({ room, onClose, onSaved }) {
   const [category, setCategory] = useState(room.category);
-  // Strip the ₦ and commas so the input shows a plain number to edit.
+  // Strip any ₦ / commas so the input holds a plain number.
   const [price, setPrice] = useState(String(room.price).replace(/[₦,]/g, ""));
+
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(null);
+
+  async function handleSave() {
+    // Basic check: price must be a number.
+    const priceNum = Number(price);
+    if (Number.isNaN(priceNum) || priceNum < 0) {
+      setError("Please enter a valid price.");
+      return;
+    }
+    try {
+      setBusy(true);
+      setError(null);
+      // Send only the fields this popup edits. The backend updates just these.
+      await updateRoom(room.id, { category, price: priceNum });
+      if (onSaved) onSaved();   // refresh the list + close
+      else onClose();
+    } catch (err) {
+      setError(err.message);
+      setBusy(false);           // keep the popup open so they can retry
+    }
+  }
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -66,19 +90,19 @@ export default function EditRoomModal({ room, onClose }) {
                 />
               </div>
             </div>
+
+            {error && (
+              <p style={{ marginTop: "12px", color: "#c0392b", fontSize: "14px" }}>{error}</p>
+            )}
           </div>
         </div>
 
         <div className="modal-footer">
-          <button className="modal-btn modal-btn--ghost" onClick={onClose}>Cancel</button>
-          <button
-            className="modal-btn modal-btn--solid"
-            onClick={() => {
-              alert(`Saved changes to ${room.number}. (Demo — nothing is stored yet.)`);
-              onClose();
-            }}
-          >
-            Save Changes
+          <button className="modal-btn modal-btn--ghost" onClick={onClose} disabled={busy}>
+            Cancel
+          </button>
+          <button className="modal-btn modal-btn--solid" onClick={handleSave} disabled={busy}>
+            {busy ? "Saving…" : "Save Changes"}
           </button>
         </div>
       </div>

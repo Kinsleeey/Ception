@@ -17,4 +17,3 @@ export const occupancyRows = [
 // Column headers shared by both tables (first column has no header in the design).
 export const roomColumns = ["Executive", "Premium", "Standard", "Total"];
 
-export const monthlyTargetPercent = 72; // drives the progress bars

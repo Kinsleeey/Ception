@@ -194,6 +194,107 @@ a:focus-visible {
   }
 }
 
+/* POPUP FOR BOOKING */
+/* ── Check-in: running list of guest cards (matches Figma 64:652) ── */
+
+/* one saved guest, shown as a card in the list */
+.cg-card {
+  background: rgba(243, 235, 250, 0.4);
+  border-radius: 24px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+/* top row: "Guest N" tag on the left, "Remove" on the right */
+.cg-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+.cg-card__tag {
+  background: rgba(99, 14, 212, 0.1);
+  color: #630ed4;
+  font-size: 10px;
+  line-height: 15px;
+  padding: 2px 8px;
+  border-radius: 9999px;
+}
+.cg-card__remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 10px;
+  line-height: 15px;
+  color: rgba(186, 26, 26, 0.7);
+}
+.cg-card__remove:hover { text-decoration: underline; }
+
+/* two-column grid of the guest's details */
+.cg-card__grid {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+}
+.cg-card__col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.cg-field__label {
+  font-size: 10px;
+  line-height: 15px;
+  color: rgba(74, 68, 85, 0.6);
+}
+.cg-field__value {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 700;
+  color: #1d1a24;
+  word-break: break-word;
+}
+
+/* "+ Add another guest / Search Existing Guest" link */
+.cg-add-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #630ed4;
+  font-size: 11px;
+  line-height: 16.5px;
+}
+.cg-add-link:hover { text-decoration: underline; }
+
+/* "Cancel Addition" link, right-aligned */
+.cg-cancel-addition {
+  align-self: flex-end;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgba(186, 26, 26, 0.7);
+  font-size: 10px;
+  line-height: 15px;
+}
+.cg-cancel-addition:hover { text-decoration: underline; }
+
+/* small helper so a whole search-result row is clickable */
+.cg-suggestion-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  width: 100%;
+  text-align: left;
+}
+
 /* =================================================================
    4. WELCOME / ROLE SELECTION PAGE  (pages/WelcomePage.jsx)
    ================================================================= */
@@ -241,7 +342,8 @@ a:focus-visible {
 
 /* The 3 role cards sit in a row, and wrap to a column on small screens */
 .role-cards {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: var(--space-6);
   width: 100%;
   flex-wrap: wrap;
@@ -281,7 +383,7 @@ a:focus-visible {
   margin-bottom: var(--space-3);
 }
 .role-card__text {
-  font-size: 16px;
+  font-size: 12px;
   color: var(--text-body);
   margin-bottom: var(--space-8);
   flex-grow: 1; /* pushes the button to the bottom so all buttons line up */
@@ -333,7 +435,7 @@ a:focus-visible {
   letter-spacing: -0.32px;
 }
 .login__subheading {
-  font-size: 16px;
+  font-size: 12px;
   color: var(--text-body);
   text-align: center;
   max-width: 320px;
@@ -543,31 +645,6 @@ a:focus-visible {
   font-weight: 700;
 }
 
-/* Progress bar under each table */
-.progress {
-  margin-top: var(--space-6);
-}
-.progress__track {
-  height: 4px;
-  width: 100%;
-  background: var(--track);
-  border-radius: var(--radius-pill);
-  overflow: hidden;
-}
-.progress__fill {
-  height: 100%;
-  background: var(--purple-table);
-  border-radius: var(--radius-pill);
-}
-.progress__labels {
-  display: flex;
-  justify-content: space-between;
-  margin-top: var(--space-2);
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-body2);
-  letter-spacing: 0.6px;
-}
 
 /* ----- Bottom stat cards (Occupied Rooms / Revenue / Guests) ----- */
 .stat-cards {
@@ -599,6 +676,8 @@ a:focus-visible {
   color: var(--text-ink);
   letter-spacing: -0.72px;
 }
+
+
 
 /* ----- Mobile: collapse the sidebar to a top strip ----- */
 /* (Legacy 820px sidebar-strip rules removed — the responsive layer at the
@@ -2470,9 +2549,16 @@ a:focus-visible {
   font-weight: 700;
   color: var(--text-dark);
 }
+/* Stock cards put the name and its category badge on one line. */
+.manage-card__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .manage-card__cat {
   display: inline-block;
-  margin-top: 6px;
+  margin-top: 0;
   padding: 2px 10px;
   font-size: 11px;
   font-weight: 600;
@@ -2499,6 +2585,69 @@ a:focus-visible {
   display: flex;
   gap: var(--space-2);
   flex-shrink: 0;
+}
+
+/* Stock History: issue / return type badges. */
+.report-pill--issue {
+  background: rgba(124, 58, 237, 0.2);
+  color: var(--purple-strong);
+}
+.report-pill--return {
+  background: #ede5f4;
+  color: var(--text-dark);
+}
+
+/* Stock History: the day picker above the table. */
+.stock-date {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0;
+  padding-left: var(--space-1);
+  color: var(--text-ink);
+  cursor: pointer;
+}
+.stock-date__text {
+  font-size: 16px;
+  font-weight: 500;
+}
+/* The native input sits invisibly over the row so the whole thing is clickable. */
+.stock-date__input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* Stock Details modal: one moved line. */
+.stock-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.stock-line {
+  display: flex;
+  align-items: center;
+  gap: 74px;
+}
+.stock-line__name {
+  width: 124px;
+  flex-shrink: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+.stock-line__box {
+  padding: 3px 9px;
+  background: #fff;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+.stock-line__box--unit {
+  width: 108px;
 }
 /* round 40px icon buttons */
 .icon-btn {
@@ -4427,3 +4576,831 @@ textarea:focus-visible,
   .desktop-required__title { font-size: 23px; }
   .desktop-required__text { font-size: 14px; }
 }
+
+
+
+/* =========================================================================
+   STORE — Issue / Return screen (storekeeper)
+   A standalone full-width screen — NO admin sidebar. Reuses the shared
+   .stat-strip, .filter-pill and .search classes; the header, product grid and
+   movement panel are unique to this screen, so they live here, all using the
+   shared design tokens.
+   ========================================================================= */
+
+.stock {
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: var(--text-dark);
+  background: var(--white);
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+/* Header */
+.stock-header {
+  display: flex;
+  align-items: center;
+  height: 80px;
+  padding: 0 40px;
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+}
+.stock-header__brand { display: flex; align-items: center; gap: var(--space-4); }
+.stock-header__icon { color: var(--text-dark); }
+.stock-header__title { margin: 0; font-size: 16px; font-weight: 700; line-height: 24px; }
+
+/* Two-column body: the product area, and the movement panel beside it. */
+.stock-layout {
+  display: flex;
+  align-items: stretch;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
+.stock-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  padding: 40px 32px 115px;
+}
+
+/* Selectable product grid. 4 across normally, 3 when the panel is open. */
+.stock-grid {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  align-content: start;
+}
+.stock-grid--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.stock-grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+.stock-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 17px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: var(--bg-sidebar);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+.stock-card:hover { transform: translateY(-1px); }
+.stock-card--selected { border-color: var(--purple-strong); }
+.stock-card:focus-visible { outline: 2px solid var(--purple-strong); outline-offset: 2px; }
+
+.stock-card__info { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; }
+.stock-card__name {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 30px;
+  color: var(--text-dark);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.stock-card__subtitle {
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 16.5px;
+  letter-spacing: -0.55px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.stock-card__stock {
+  flex-shrink: 0;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 24px;
+  color: var(--purple-strong);
+  text-align: right;
+}
+
+.stock-empty {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: var(--space-8) 0;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* Full-width primary button (switch flow / save). */
+.stock-cta {
+  width: 100%;
+  padding: var(--space-4);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--purple-strong);
+  color: var(--white);
+  font: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+  cursor: pointer;
+  box-shadow: var(--shadow-btn);
+  transition: opacity 0.15s ease;
+}
+.stock-cta:hover:not(:disabled) { opacity: 0.92; }
+.stock-cta:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
+.stock-cta:focus-visible { outline: 2px solid var(--text-dark); outline-offset: 2px; }
+
+/* Right-hand movement panel (appears once something is selected). */
+.stock-panel {
+  flex-shrink: 0;
+  width: 370px;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-6) var(--space-6) var(--space-6) 25px;
+  background: var(--bg-sidebar);
+  border-left: 1px solid rgba(204, 195, 216, 0.1);
+}
+.stock-panel__title {
+  margin: 0 0 14px;
+  padding-bottom: 14px;
+  border-bottom: 0.5px solid rgba(204, 195, 216, 0.7);
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 32px;
+  color: var(--text-dark);
+}
+.stock-panel__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-4) var(--space-2) 0 0;
+}
+
+.stock-line { display: flex; align-items: center; gap: var(--space-3); }
+.stock-line__name {
+  width: 124px;
+  flex-shrink: 0;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+  color: var(--text-dark);
+}
+.stock-line__qty,
+.stock-line__unit {
+  padding: 3px 9px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: var(--white);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 24px;
+  color: var(--text-dark);
+}
+.stock-line__qty { width: 56px; }
+.stock-line__unit { width: 108px; cursor: pointer; }
+.stock-line__qty:focus-visible,
+.stock-line__unit:focus-visible { outline: 2px solid var(--purple-strong); outline-offset: 1px; }
+
+.stock-line__remove {
+  margin-left: auto;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+.stock-line__remove:hover { background: var(--white); color: var(--text-dark); }
+
+.stock-party { display: flex; flex-direction: column; gap: 5.5px; }
+.stock-party__label {
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 16.5px;
+  letter-spacing: -0.55px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.stock-party__input {
+  width: 100%;
+  padding: 11px 13px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-input);
+  background: var(--white);
+  font: inherit;
+  font-size: 14px;
+  color: var(--text-dark);
+}
+.stock-party__input::placeholder { color: #6b7280; }
+.stock-party__input:focus-visible { outline: 2px solid var(--purple-strong); outline-offset: 1px; }
+
+/* Responsive: collapse columns and drop the panel below on narrow screens. */
+@media (max-width: 1200px) {
+  .stock-grid--4 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .stock-grid--3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 900px) {
+  .stock-layout { flex-direction: column; }
+  .stock-panel {
+    width: 100%;
+    border-left: 0;
+    border-top: 1px solid rgba(204, 195, 216, 0.4);
+  }
+  .stock-grid--4,
+  .stock-grid--3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 600px) {
+  .stock-grid--4,
+  .stock-grid--3 { grid-template-columns: 1fr; }
+}
+
+
+/* =========================================================================
+   ACCOUNTS (admin) — page cards, badges, bento tiles, and summary popup rows.
+   Reuses the shared shell (.dashboard/.main/.topbar/.content), .search,
+   .btn-pill-primary, .modal-* and .form-modal-* families. Only the pieces
+   unique to this feature live here, all using the shared design tokens.
+   ========================================================================= */
+
+/* Header row: title + create button */
+.acct-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+.acct-header-row__title {
+  font-size: 16px;
+  color: var(--text-body);
+}
+.acct-create-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Card grid — 3 across, like the Figma design */
+.acct-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-6);
+  width: 100%;
+}
+.acct-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 200px;
+  padding: 25px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+.acct-card--suspended { opacity: 0.6; }
+
+.acct-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 13px;
+  border-bottom: 1px solid var(--border);
+}
+.acct-card__name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-dark);
+}
+
+/* Status badge */
+.acct-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 500;
+}
+.acct-badge__dot { width: 8px; height: 8px; border-radius: 50%; }
+.acct-badge--active { background: #f0fdf4; color: #047857; }
+.acct-badge--active .acct-badge__dot { background: #10b981; }
+.acct-badge--suspended { background: #f3f4f6; color: #4b5563; }
+.acct-badge--suspended .acct-badge__dot { background: #9ca3af; }
+
+.acct-card__rows { display: flex; flex-direction: column; gap: 12px; }
+.acct-card__row { display: flex; align-items: center; justify-content: space-between; }
+.acct-card__label { font-size: 14px; color: var(--text-body); }
+.acct-card__value {
+  font-family: "Liberation Mono", ui-monospace, monospace;
+  font-size: 14px;
+  color: var(--text-dark);
+}
+.acct-card__value--negative { color: #ba1a1a; }
+
+.acct-card__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  padding-top: 16px;
+}
+.acct-card__link {
+  font-size: 14px;
+  color: var(--purple-strong);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.acct-card__link:hover { text-decoration: underline; }
+
+/* Bento tiles */
+.acct-bento { display: flex; gap: var(--space-6); width: 100%; }
+.acct-bento__tile {
+  flex: 1 0 0;
+  min-width: 0;
+  min-height: 160px;
+  padding: 33px;
+  background: var(--bg-sidebar);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.acct-bento__tile--health { flex-direction: row; align-items: center; justify-content: space-between; }
+.acct-bento__heading { font-size: 16px; color: var(--purple-strong); margin-bottom: 8px; }
+.acct-bento__figure { font-size: 24px; font-weight: 700; color: var(--text-ink); letter-spacing: -0.32px; }
+.acct-bento__note { margin-top: 4px; font-size: 14px; color: var(--text-muted); }
+.acct-bento__health-info { display: flex; flex-direction: column; gap: 8px; }
+.acct-bento__counts { display: flex; gap: 16px; }
+.acct-bento__count { display: flex; flex-direction: column; align-items: center; }
+.acct-bento__count-num { font-size: 24px; font-weight: 700; color: var(--text-ink); }
+.acct-bento__count-label { font-size: 12px; font-weight: 600; color: var(--text-muted); letter-spacing: 0.6px; }
+.acct-bento__chart {
+  width: 96px; height: 96px; border-radius: 50%;
+  border: 2px solid var(--purple-strong);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--purple-strong);
+}
+
+/* Summary popup: key/value rows */
+.acct-sec { margin-bottom: 24px; }
+.acct-kv { display: flex; align-items: center; justify-content: space-between; padding: 4px 0; }
+.acct-kv__label { font-size: 14px; color: var(--text-body); }
+.acct-kv__value {
+  font-family: "Liberation Mono", ui-monospace, monospace;
+  font-size: 14px;
+  color: var(--text-dark);
+}
+.acct-kv__value--accent { color: var(--purple-strong); font-weight: 700; }
+
+/* Summary popup: transaction ledger */
+.acct-txns { display: flex; flex-direction: column; }
+.acct-txn {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 8px;
+  border-top: 1px solid rgba(204, 195, 216, 0.3);
+}
+.acct-txn:first-child { border-top: 0; }
+.acct-txn__label { font-size: 14px; font-weight: 500; color: var(--text-dark); }
+.acct-txn__date { font-size: 12px; color: var(--text-body); }
+.acct-txn__right { display: flex; align-items: center; gap: 12px; color: var(--text-muted); }
+.acct-txn__amount { font-family: "Liberation Mono", ui-monospace, monospace; font-size: 14px; }
+.acct-txn__amount--in { color: #059669; }
+.acct-txn__amount--out { color: var(--text-dark); }
+
+/* Top-up popup: current balance line */
+.acct-topup-current {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 13px;
+  background: var(--bg-sidebar);
+  border-radius: var(--radius-input);
+}
+.acct-topup-current__label { font-size: 14px; color: var(--text-body); }
+.acct-topup-current__value { font-family: "Liberation Mono", ui-monospace, monospace; font-size: 14px; font-weight: 700; color: var(--text-dark); }
+
+@media (max-width: 1100px) {
+  .acct-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .acct-bento { flex-direction: column; }
+}
+@media (max-width: 700px) {
+  .acct-grid { grid-template-columns: 1fr; }
+}
+
+.order-pay { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.order-pay__label {
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: -0.55px; color: var(--text-muted);
+}
+
+.acct-txn--clickable {
+  width: 100%;
+  background: none;
+  border: 0;
+  border-top: 1px solid rgba(204, 195, 216, 0.3);
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+.acct-txn--clickable:first-child { border-top: 0; }
+.acct-txn--clickable:hover { background: rgba(99, 14, 212, 0.04); }
+
+.icon-btn--topup { background: #e7f7ee; color: #0f7a43; }
+.icon-btn--topup:hover { background: #d7f0e2; }
+
+/* Low stock (< 10) — red card in the admin Top-up screen to prompt a restock. */
+.manage-card--low {
+  border-color: #ffb4ab;
+  background: #fff5f4;
+}
+.manage-card--low .manage-card__price {
+  color: #ba1a1a;
+}
+
+/* The calendar icon is now a button that opens the date picker. Strip default
+   button chrome so it looks like the plain icon it replaces. */
+.stock-date__icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.stock-date__input {
+  position: absolute;
+  width: 0;
+  height: 0;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Ception wordmark in the sidebar brand slot */
+.sidebar__brand-logo {
+  padding: 0 var(--space-2);
+}
+
+/* Caption + "Create Multiple Reservations" sit on one row */
+.room-caption-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-6);
+  width: 100%;
+}
+.multi-reserve-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--purple-strong);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.multi-reserve-link:hover { text-decoration: underline; }
+/* Let the 8 category pills wrap onto a second row. Add flex-wrap to BOTH
+   (your file defines two tab rules; I can't tell which the dashboard uses). */
+.category-tabs { flex-wrap: wrap; }
+.cat-tabs      { flex-wrap: wrap; }
+
+/* =========================================================================
+   RESERVATIONS
+   Reuses .report-table, .report-panel, .stat-strip, .search, .pill-input,
+   .section-divider, .detail-row and the modal families.
+   ========================================================================= */
+
+/* Caption line and the multi-reservation link share one row. */
+.room-caption-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-6);
+  width: 100%;
+}
+.room-caption-row .room-caption { padding: var(--space-6) 0; margin: 0; }
+.multi-reserve-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--purple-strong);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.multi-reserve-link:hover { text-decoration: underline; }
+
+/* ---- Reservations panel (sits where the room grid would be) ---- */
+.resv-panel {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.resv-reserver { font-weight: 500; color: var(--text-dark); }
+.resv-view {
+  margin-left: var(--space-2);
+  padding: 0; border: 0; background: none; font: inherit;
+  font-size: 12px; color: var(--purple-strong); cursor: pointer;
+}
+.resv-view:hover { text-decoration: underline; }
+
+.resv-dates { white-space: nowrap; color: var(--text-body); }
+
+.resv-room-select {
+  padding: 5px 10px;
+  font: inherit; font-size: 13px;
+  color: var(--text-dark);
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+.resv-room-select:focus-visible { outline: 2px solid var(--purple-strong); outline-offset: 1px; }
+
+/* Text action, muted until a room is assigned. */
+.resv-checkin {
+  padding: 0; border: 0; background: none; font: inherit;
+  font-size: 13px; font-weight: 600;
+  color: var(--purple-strong); cursor: pointer; white-space: nowrap;
+}
+.resv-checkin:disabled { color: var(--text-muted); cursor: not-allowed; }
+.resv-checkin:not(:disabled):hover { text-decoration: underline; }
+
+/* ---- Create page ---- */
+.reserve-page {
+  width: 100%; max-width: 1200px; margin: 0 auto;
+  padding: var(--space-8) var(--space-6) var(--space-12);
+  display: flex; flex-direction: column; gap: var(--space-8);
+}
+.reserve-page__head { display: flex; align-items: center; justify-content: space-between; }
+.reserve-page__title { margin: 0; font-size: 24px; font-weight: 600; color: var(--text-dark); }
+.reserve-page__close {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border: 0; border-radius: 50%;
+  background: var(--card-grey); color: var(--text-body); cursor: pointer;
+}
+.reserve-section { display: flex; flex-direction: column; gap: var(--space-4); }
+.reserve-grid { display: grid; gap: var(--space-4); }
+.reserve-grid--2 { grid-template-columns: 1fr 1fr; }
+.reserve-nights { margin: 0; font-size: 14px; color: var(--text-muted); }
+
+.reserve-table__name { font-weight: 600; color: var(--text-dark); }
+.reserve-table__status { color: var(--text-muted); }
+.reserve-qty {
+  width: 64px; padding: 9px 13px; text-align: center;
+  font: inherit; font-size: 16px; color: var(--text-dark);
+  background: var(--white); border: 1px solid var(--border); border-radius: 8px;
+}
+.reserve-qty--set { border-color: var(--purple-strong); color: var(--purple-strong); font-weight: 700; }
+.reserve-qty:focus-visible { outline: 2px solid var(--purple-strong); outline-offset: 1px; }
+
+.reserve-summary {
+  display: flex; flex-direction: column; gap: var(--space-3);
+  padding: var(--space-6);
+  background: var(--bg-sidebar);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+.reserve-summary__empty { margin: 0; font-size: 14px; color: var(--text-muted); }
+.reserve-summary__rule { height: 1px; background: var(--border); margin: var(--space-2) 0; }
+.reserve-summary__total-label { font-weight: 700; color: var(--text-dark); }
+.reserve-summary__total {
+  font-family: "Liberation Mono", ui-monospace, monospace;
+  font-size: 20px; font-weight: 700; color: var(--purple-strong);
+}
+.reserve-summary__payment { margin-top: var(--space-2); display: flex; flex-direction: column; gap: 5.5px; }
+.reserve-save { width: 100%; }
+
+@media (max-width: 900px) {
+  .reserve-grid--2 { grid-template-columns: 1fr; }
+}
+
+/* Let the 8 category pills wrap. Add to BOTH tab rules. */
+.category-tabs { flex-wrap: wrap; }
+.cat-tabs      { flex-wrap: wrap; }
+
+/* =========================================================================
+   ROOM DASHBOARD — the two links above the category tabs
+   ========================================================================= */
+.room-actions-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 94px;
+  width: 100%;
+  padding-top: var(--space-6);
+}
+.room-action-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--purple-strong);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.room-action-link:hover { text-decoration: underline; }
+
+/* =========================================================================
+   RESERVATIONS PAGE — table matched to the Figma spec
+   ========================================================================= */
+.resv-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding-bottom: 32px;
+}
+.resv-head__title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 24px;
+  color: var(--purple-strong);
+}
+.resv-head__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-body);
+  cursor: pointer;
+}
+.resv-head__close:hover { color: var(--text-dark); }
+
+/* Table card */
+.resv-card {
+  width: 100%;
+  background: var(--white);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.resv-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.resv-table thead tr { background: rgba(231, 238, 254, 0.3); }
+.resv-table th {
+  padding: 16px 24px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: -0.55px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.resv-table th.is-right,
+.resv-table td.is-right { text-align: right; }
+
+.resv-table td {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.resv-empty { padding: 24px; color: var(--text-muted); }
+
+/* Reserver: name + View stacked */
+.resv-reserver {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--text-body);
+}
+.resv-view {
+  margin-top: 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: -0.55px;
+  line-height: 16px;
+  color: var(--purple-strong);
+  cursor: pointer;
+}
+.resv-view:hover { text-decoration: underline; }
+
+/* Category: plain bold purple text */
+.resv-category {
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 16.5px;
+  color: #5a00c6;
+}
+
+/* Stay dates: start above, end below in muted grey */
+.resv-date {
+  font-size: 12px;
+  line-height: 20px;
+  color: var(--text-body);
+  white-space: nowrap;
+}
+.resv-date--end { color: var(--text-muted); }
+
+/* Payment pills */
+.resv-pay {
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  line-height: 20px;
+  white-space: nowrap;
+}
+.resv-pay--account {
+  padding: 3.5px 17px;
+  background: #eaddff;
+  border: 1px solid rgba(99, 14, 212, 0.1);
+  color: #5a00c6;
+  font-weight: 500;
+}
+.resv-pay--cash {
+  padding: 3.5px 12px;
+  background: #ede5f4;
+  color: var(--text-body);
+  font-weight: 600;
+  letter-spacing: 0.6px;
+}
+.resv-pay--pos {
+  padding: 2.5px 16px;
+  background: #dce3f2;
+  color: var(--text-body);
+  font-weight: 700;
+}
+
+/* Room: assigned shows as mono text; otherwise the Assign dropdown */
+.resv-room {
+  font-family: "Liberation Mono", ui-monospace, monospace;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--text-body);
+  white-space: nowrap;
+}
+.resv-assign { position: relative; display: inline-flex; align-items: center; }
+.resv-assign__select {
+  appearance: none;
+  padding: 8px 40px 8px 24px;
+  font: inherit;
+  font-size: 12px;
+  line-height: 20px;
+  color: var(--text-dark);
+  background: rgba(226, 232, 248, 0.5);
+  border: 0;
+  border-radius: 12px;
+  cursor: pointer;
+}
+.resv-assign__select:focus-visible {
+  outline: 2px solid var(--purple-strong);
+  outline-offset: 1px;
+}
+.resv-assign__chevron {
+  position: absolute;
+  right: 12px;
+  display: inline-flex;
+  pointer-events: none;
+  color: var(--text-dark);
+}
+
+/* Action: two stacked text links */
+.resv-action {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 20px;
+  text-align: right;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.resv-action--checkin { color: var(--purple-strong); }
+.resv-action--checkin:disabled {
+  color: rgba(123, 116, 135, 0.5);
+  cursor: not-allowed;
+}
+.resv-action--cancel { color: #ba1a1a; }
+.resv-action:not(:disabled):hover { text-decoration: underline; }

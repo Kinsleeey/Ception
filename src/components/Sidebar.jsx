@@ -1,13 +1,12 @@
 import { NavLink } from "react-router-dom";
 import SidebarShell from "./SidebarShell.jsx";
 import {
-  GridIcon, DoorIcon, UsersIcon, ChartIcon, EditIcon, SettingsIcon,
+  GridIcon, DoorIcon, UsersIcon, ChartIcon, AccountIcon, EditIcon, SettingsIcon,
+  BoxIcon, ReceiptIcon,
 } from "./icons.jsx";
+import Logo from "./Logo.jsx";
 
-// The navigation items, grouped into sections like in the Figma design.
-// Each link has a `to` path. We use react-router's <NavLink>, which
-// automatically adds the "active" styling to whichever link matches the
-// current URL — so the highlight follows you from page to page on its own.
+
 const sections = [
   {
     label: "Rooms",
@@ -24,6 +23,19 @@ const sections = [
       { name: "Add/Edit Drinks", to: "/bar-drinks", Icon: EditIcon },
     ],
   },
+  {
+    label: "Stock",
+    links: [
+      { name: "Top-up/Edit", to: "/stock-manage", Icon: BoxIcon },
+      { name: "History", to: "/stock-history", Icon: ReceiptIcon },
+    ],
+  },
+  {
+    label: "Accounts",
+    links: [
+      { name: "Account", to: "/account", Icon: AccountIcon },
+  ],
+},
 ];
 
 // NavLink calls this function with { isActive } and we return the class name.
@@ -34,9 +46,8 @@ function linkClass({ isActive }) {
 export default function Sidebar() {
   return (
     <SidebarShell brand="PD Luxury">
-      <div>
-        <div className="sidebar__brand-name">PD Luxury</div>
-        <div className="sidebar__brand-sub">Hotel and Suites</div>
+      <div className="sidebar__brand-logo">
+        <Logo height={28} />
       </div>
 
       {sections.map((section) => (

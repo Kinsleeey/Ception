@@ -9,19 +9,15 @@ import AdminSettings from "./pages/AdminSettings.jsx";
 import BartenderDashboard from "./pages/BartenderDashboard.jsx";
 import BarReport from "./pages/BarReport.jsx";
 import BarEditDrinks from "./pages/BarEditDrinks.jsx";
+import StockTopUp from "./pages/StockTopUp.jsx";
+import StockHistory from "./pages/StockHistory.jsx";
+import { IssueStock, ReturnStock } from "./pages/StockMovement.jsx";
+import Accounts from "./pages/Accounts.jsx";
+import Reservations from "./pages/Reservations.jsx";
+import ReservationCreate from "./pages/ReservationCreate.jsx";
 
-// App decides which page to show based on the URL in the address bar.
-// Each <Route> maps a URL path to a page component.
-//
-// Note: popups (guest registration, booking/reservation details, the product
-// forms, order details, etc.) are NOT routes. They open as overlays on top of
-// the page that triggered them, so they live in that page's state instead of
-// here. That's why this list only has full screens.
-//
-// To add a new screen later:
-//   1. Make a new file in src/pages (copy an existing one as a starting point).
-//   2. Import it at the top of this file.
-//   3. Add a <Route path="/your-path" element={<YourPage />} /> below.
+
+
 export default function App() {
   return (
     <Routes>
@@ -42,6 +38,22 @@ export default function App() {
       {/* Bar area */}
       <Route path="/bar" element={<BartenderDashboard />} />
       <Route path="/bar-drinks" element={<BarEditDrinks />} />
+
+      {/* Store — admin */}
+      <Route path="/stock-manage" element={<StockTopUp />} />
+      <Route path="/stock-history" element={<StockHistory />} />
+
+      {/* Store — storekeeper */}
+      <Route path="/stock/issue" element={<IssueStock />} />
+      <Route path="/stock/return" element={<ReturnStock />} />
+      
+      {/* Accounts (admin) */}
+      <Route path="/account" element={<Accounts />} />
+
+      {/* Multi-room reservation form (reception) */}
+      <Route path="/reservations/new" element={<ReservationCreate />} />
+      <Route path="/reservations" element={<Reservations />} />
+
     </Routes>
   );
 }

@@ -1,138 +1,251 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import BarSidebar from "../components/BarSidebar.jsx";
 import OrderPanel from "../components/OrderPanel.jsx";
 import ConfirmModal from "../components/ConfirmModal.jsx";
 import { ArrowLeftIcon, SearchIcon } from "../components/icons.jsx";
-import { products, barCategories, barStats, barLocations } from "../data/barData.js";
+import {
+  getProducts, getBarCategories, getCart,
+  addToCart, updateCartItem, removeCartItem, checkoutOrder, getAccounts,
+} from "../api.js";
 
-// The bartender's product list ("Products"). Tapping a product adds it to the
-// "Current Order" panel on the right, where quantities can be adjusted. This
-// matches the Figma frame where selecting drinks reveals the order sidebar.
+// The bartender's product list. The selected BAR lives here (lifted from the
+// sidebar) and drives everything: which drinks to fetch and which cart to show.
 export default function BartenderDashboard() {
-  const [category, setCategory] = useState("All");
-  // The order: a map of product name -> quantity. Kept as state so the panel
-  // and the selected-card styling update as the bartender taps products.
-  const [order, setOrder] = useState({}); // { [name]: qty }
+  // --- The single source of truth for "which bar" ---
+  const [location, setLocation] = useState("Bar 1");
+
+  // Category filter. `categoryId` null = "All".
+  const [categories, setCategories] = useState([]);
+  const [categoryId, setCategoryId] = useState(null);
+
+  // Products for the current bar + category.
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const [pendingMethod, setPendingMethod] = useState("Cash");
+
+  // The cart for the current bar (loaded from the server).
+  const [cart, setCart] = useState([]);
+
   const [confirmPrint, setConfirmPrint] = useState(false);
+  const [busy, setBusy] = useState(false);
 
-  const location = barLocations[0]; // "Bar 1" (matches the active sidebar item)
+  const [accounts, setAccounts] = useState([]);
 
-  const visible =
-    category === "All" ? products : products.filter((p) => p.category === category);
+  useEffect(() => {
+    getAccounts()
+      .then((rows) => setAccounts(rows.filter((a) => a.status === "Active")))
+      .catch(() => setAccounts([]));
+  }, []);
 
-  // Add one of a product to the order (tapping its card).
-  function addToOrder(name) {
-    setOrder((prev) => ({ ...prev, [name]: (prev[name] || 0) + 1 }));
-  }
-  // Increase / decrease a line's quantity from the order panel. Dropping to 0
-  // removes the line.
-  function inc(name) {
-    setOrder((prev) => ({ ...prev, [name]: (prev[name] || 0) + 1 }));
-  }
-  function dec(name) {
-    setOrder((prev) => {
-      const next = { ...prev };
-      const q = (next[name] || 0) - 1;
-      if (q <= 0) delete next[name];
-      else next[name] = q;
-      return next;
-    });
-  }
-  function clearOrder() {
-    setOrder({});
+  // Load the category list once (for the filter pills).
+  useEffect(() => {
+    getBarCategories().then(setCategories).catch(() => setCategories([]));
+  }, []);
+
+  // Load products whenever the bar or category changes.
+  useEffect(() => {
+    async function loadProducts() {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await getProducts({
+          bar_location: location,
+          category_id: categoryId || undefined,
+        });
+        setProducts(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadProducts();
+  }, [location, categoryId]);
+
+  // Load the cart whenever the bar changes (each bar has its own cart).
+  useEffect(() => {
+    getCart(location).then(setCart).catch(() => setCart([]));
+  }, [location]);
+
+  // Helper: re-fetch this bar's cart (our single source of truth).
+  async function refreshCart() {
+    try {
+      const data = await getCart(location);
+      setCart(data);
+    } catch {
+      setCart([]);
+    }
   }
 
-  // Build the ordered list (only products that are in the order), preserving
-  // the product catalog order.
-  const orderItems = products
-    .filter((p) => order[p.name])
-    .map((p) => ({ ...p, qty: order[p.name] }));
+  // Tap a drink -> add to this bar's cart -> refresh the panel.
+  async function handleAddDrink(productId) {
+    try {
+      setBusy(true);
+      await addToCart(productId, location);
+      await refreshCart();
+    } catch (err) {
+      alert(`Couldn't add: ${err.message}`);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  // Panel +/- : set a line's quantity, then refresh.
+  async function handleSetQty(cartItemId, quantity) {
+    try {
+      await updateCartItem(cartItemId, quantity);
+      await refreshCart();
+    } catch (err) {
+      alert(`Couldn't update: ${err.message}`);
+    }
+  }
+
+  // Clear order = remove every line in this bar's cart, then refresh.
+  async function handleClear() {
+    try {
+      await Promise.all(cart.map((line) => removeCartItem(line.id)));
+      await refreshCart();
+    } catch (err) {
+      alert(`Couldn't clear: ${err.message}`);
+    }
+  }
+
+  // Print Receipt -> save the order -> cart comes back empty.
+  // Print Receipt -> save the order with the chosen method -> cart comes back.
+  // If an account charge is rejected (over its credit floor), the order is NOT
+  // saved and the cart is left intact so the bartender can pick another method.
+  async function handlePrint(method) {
+    try {
+      setBusy(true);
+      await checkoutOrder(location, method);
+      setConfirmPrint(false);
+      await refreshCart();
+    } catch (err) {
+      alert(`Checkout failed: ${err.message}`);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  // Which product ids are already in the cart (for the "selected" card style).
+  const inCart = new Set(cart.map((line) => line.product_id));
+
+  // Shape the cart lines into what OrderPanel expects.
+  const orderItems = cart.map((line) => ({
+    id: line.id,
+    name: line.name,
+    price: line.price,
+    unit: line.unit,
+    qty: line.quantity,
+    lineTotal: line.line_total,
+  }));
 
   const hasOrder = orderItems.length > 0;
 
+  const paymentOptions = ["Cash", "Direct Bank Transfer", "Card", "POS",
+    ...accounts.map((a) => a.name)];
+
   return (
     <div className="dashboard">
-      <BarSidebar />
+      {/* Sidebar now receives the lifted state + a way to change it. */}
+      <BarSidebar activeLocation={location} onSelect={setLocation} />
 
       <div className="main">
         <header className="topbar topbar--bordered">
           <ArrowLeftIcon size={20} />
-          <span className="topbar__title">Products</span>
+          <span className="topbar__title">Products — {location}</span>
         </header>
 
-        {/* Products area + order panel sit side by side */}
         <div className="bar-layout">
           <div className="content bar-content">
-            {/* Stats strip */}
+            {/* Stats strip (now reflects the loaded products) */}
             <div className="stat-strip">
               <span className="stat-strip__item">
-                Total Products <span className="stat-strip__num">{barStats.totalProducts}</span>
+                Total Products <span className="stat-strip__num">{products.length}</span>
               </span>
               <span className="stat-strip__divider" />
               <span className="stat-strip__item">
-                Categories <span className="stat-strip__num">{barStats.categories}</span>
+                Categories <span className="stat-strip__num">{categories.length}</span>
               </span>
             </div>
 
-            {/* Category filter pills */}
+            {/* Category pills: "All" + one per category from the DB. */}
             <div className="filter-pills">
-              {barCategories.map((cat) => (
+              <button
+                className={categoryId === null ? "filter-pill filter-pill--active" : "filter-pill"}
+                onClick={() => setCategoryId(null)}
+              >
+                All
+              </button>
+              {categories.map((cat) => (
                 <button
-                  key={cat}
-                  className={cat === category ? "filter-pill filter-pill--active" : "filter-pill"}
-                  onClick={() => setCategory(cat)}
+                  key={cat.id}
+                  className={cat.id === categoryId ? "filter-pill filter-pill--active" : "filter-pill"}
+                  onClick={() => setCategoryId(cat.id)}
                 >
-                  {cat}
+                  {cat.name}
                 </button>
               ))}
             </div>
 
-            {/* Search */}
+            {/* Search (visual only for now) */}
             <div className="search search--wide">
-              <span className="search__icon">
-                <SearchIcon size={18} />
-              </span>
+              <span className="search__icon"><SearchIcon size={18} /></span>
               <input className="search__input" type="text" placeholder="Search products..." />
             </div>
 
-            {/* Product grid. Tapping a card adds it to the order; cards already
-                in the order get a selected (grey) background. */}
-            <div className="product-grid">
-              {visible.map((product) => {
-                const selected = Boolean(order[product.name]);
-                return (
-                  <button
-                    type="button"
-                    className={selected ? "product-card product-card--selected" : "product-card"}
-                    key={product.name}
-                    onClick={() => addToOrder(product.name)}
-                  >
-                    <div className="product-card__info">
-                      <div className="product-card__name">{product.name}</div>
-                      <div className="product-card__label">Price per unit</div>
-                    </div>
-                    <div className="product-card__price">{product.price}</div>
-                  </button>
-                );
-              })}
-            </div>
+            {/* Product grid */}
+            {loading ? (
+              <p style={{ padding: "24px", color: "#7b7487" }}>Loading drinks…</p>
+            ) : error ? (
+              <p style={{ padding: "24px", color: "#c0392b" }}>Couldn’t load: {error}</p>
+            ) : products.length === 0 ? (
+              <p style={{ padding: "24px", color: "#7b7487" }}>
+                No drinks in {location}{categoryId ? " for this category" : ""}.
+              </p>
+            ) : (
+              <div className="product-grid">
+                {products.map((product) => {
+                  const selected = inCart.has(product.id);
+                  return (
+                    <button
+                      type="button"
+                      className={selected ? "product-card product-card--selected" : "product-card"}
+                      key={product.id}
+                      onClick={() => handleAddDrink(product.id)}
+                      disabled={busy}
+                    >
+                      <div className="product-card__info">
+                        <div className="product-card__name">{product.name}</div>
+                        <div className="product-card__label">Price per unit</div>
+                      </div>
+                      <div className="product-card__price">
+                        ₦{Number(product.price).toLocaleString()}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
-          {/* Order panel only appears once at least one drink is selected. */}
+          {/* Order panel appears once the cart has something in it. */}
           {hasOrder && (
             <OrderPanel
               location={location}
               items={orderItems}
-              onInc={inc}
-              onDec={dec}
-              onClear={clearOrder}
-              onPrint={() => setConfirmPrint(true)}
+              paymentOptions={paymentOptions}
+              onInc={(item) => handleSetQty(item.id, item.qty + 1)}
+              onDec={(item) => handleSetQty(item.id, item.qty - 1)}
+              onClear={handleClear}
+              onPrint={(method) => { setPendingMethod(method); setConfirmPrint(true); }}
             />
           )}
         </div>
       </div>
 
-      {/* Print/checkout confirmation */}
       {confirmPrint && (
         <ConfirmModal
           variant="default"
@@ -140,13 +253,9 @@ export default function BartenderDashboard() {
           confirmLabel="Print"
           cancelLabel="Cancel"
           onCancel={() => setConfirmPrint(false)}
-          onConfirm={() => {
-            alert("Receipt printed and order sent. (Demo — nothing is stored yet.)");
-            setConfirmPrint(false);
-            clearOrder();
-          }}
+          onConfirm={() => handlePrint(pendingMethod)}
         >
-          This will print the receipt for the current order and send it to the kitchen/bar.
+          This will save the order for {location} ({pendingMethod}) and clear the current cart.
         </ConfirmModal>
       )}
     </div>

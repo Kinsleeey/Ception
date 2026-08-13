@@ -1,39 +1,77 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar.jsx";
 import CategoryTabs from "../components/CategoryTabs.jsx";
 import StatusFilterPanel from "../components/StatusFilterPanel.jsx";
 import RoomCard from "../components/RoomCard.jsx";
 import EditRoomModal from "../components/EditRoomModal.jsx";
 import { GridIcon } from "../components/icons.jsx";
-import { rooms, CATEGORIES, countByStatus } from "../data/roomsData.js";
+import { CATEGORIES } from "../data/roomsData.js";
+import { getRooms, disableRoom, getRoomGuestCount, getRoomStatusCounts } from "../api.js";
 
-// Room Details is the admin-side view of the same rooms. Each card can be
-// disabled (its details blur out and the button flips to "Activate") or
-// edited (opens a popup over this page, which stays blurred behind it).
+// Room Details is the admin-side view of rooms. Rooms come from the backend;
+// each can be disabled (real is_disabled column) or edited (popup). Each
+// Available card also shows how many guests that room has had so far.
 export default function RoomDetails() {
   const [category, setCategory] = useState("Executive");
   const [status, setStatus] = useState("Available");
 
-  // The set of room numbers that are currently disabled. Using a Set lets us
-  // flip one room without touching the others. (Stored as state so the UI
-  // re-renders when it changes.)
-  const [disabled, setDisabled] = useState(() => new Set());
-  // The room currently being edited (null = the edit popup is closed).
+  const [statusCounts, setStatusCounts] = useState({});
+
+  const [rooms, setRooms] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // A map of { roomId: guestCount } filled in after rooms load.
+  const [counts, setCounts] = useState({});
+
   const [editing, setEditing] = useState(null);
 
-  function toggleDisabled(number) {
-    setDisabled((prev) => {
-      const next = new Set(prev);
-      if (next.has(number)) next.delete(number);
-      else next.add(number);
-      return next;
-    });
+  // Fetch rooms for the current filters. Kept separate so we can refresh after
+  // a disable/edit.
+  async function loadRooms() {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await getRooms({ category, status });
+      setRooms(data);
+      // Per-status badge counts (admin counts all rooms, incl. disabled).
+      const sc = await getRoomStatusCounts({ category });
+      setStatusCounts(sc);
+
+      // For each room, fetch its "guests so far" count. These are independent
+      // little requests; we run them together and collect the results into a
+      // { roomId: count } map. (Fine for a handful of rooms.)
+      const entries = await Promise.all(
+        data.map(async (room) => {
+          try {
+            const res = await getRoomGuestCount(room.id);
+            return [room.id, res.guest_count];
+          } catch {
+            return [room.id, 0];
+          }
+        })
+      );
+      setCounts(Object.fromEntries(entries));
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   }
 
-  const visibleRooms = rooms.filter(
-    (room) => room.category === category && room.status === status
-  );
-  const counts = countByStatus(category);
+  useEffect(() => {
+    loadRooms();
+  }, [category, status]);
+
+  // Toggle a room's disabled state in the database, then refresh.
+  async function handleToggleDisabled(room) {
+    try {
+      await disableRoom(room.id, !room.is_disabled);
+      await loadRooms();
+    } catch (err) {
+      alert(`Couldn't update room: ${err.message}`);
+    }
+  }
 
   return (
     <div className="dashboard">
@@ -53,22 +91,25 @@ export default function RoomDetails() {
           </p>
 
           <div className="room-layout">
-            <StatusFilterPanel counts={counts} active={status} onChange={setStatus} />
+            <StatusFilterPanel counts={statusCounts} active={status} onChange={setStatus} />
 
-            {visibleRooms.length === 0 ? (
+            {loading ? (
+              <p style={{ padding: "24px", color: "#7b7487" }}>Loading rooms…</p>
+            ) : error ? (
+              <p style={{ padding: "24px", color: "#c0392b" }}>Couldn’t load: {error}</p>
+            ) : rooms.length === 0 ? (
               <p style={{ padding: "24px", color: "#7b7487" }}>
                 No {status.toLowerCase()} rooms in {category} right now.
               </p>
             ) : (
               <div className="room-grid room-grid--two">
-                {visibleRooms.map((room) => {
-                  const isOff = disabled.has(room.number);
-                  // The primary button flips between Disable and Activate.
+                {rooms.map((room) => {
+                  const isOff = room.is_disabled;
                   const actions = [
                     {
                       label: isOff ? "Activate" : "Disable",
                       variant: "solid",
-                      onClick: () => toggleDisabled(room.number),
+                      onClick: () => handleToggleDisabled(room),
                     },
                     {
                       label: "Edit Room Details",
@@ -78,11 +119,11 @@ export default function RoomDetails() {
                   ];
                   return (
                     <RoomCard
-                      key={room.number}
+                      key={room.id}
                       disabled={isOff}
                       room={
                         status === "Available"
-                          ? { ...room, meta: { value: room.guestsSoFar, label: "guests so far" } }
+                          ? { ...room, meta: { value: counts[room.id] ?? 0, label: "guests so far" } }
                           : room
                       }
                       actions={actions}
@@ -95,9 +136,14 @@ export default function RoomDetails() {
         </div>
       </div>
 
-      {/* Edit popup renders on top of this page; the page shows blurred behind
-          it thanks to the overlay's backdrop blur. */}
-      {editing && <EditRoomModal room={editing} onClose={() => setEditing(null)} />}
+      {/* Edit popup. On save it refreshes the list. */}
+      {editing && (
+        <EditRoomModal
+          room={editing}
+          onClose={() => setEditing(null)}
+          onSaved={async () => { setEditing(null); await loadRooms(); }}
+        />
+      )}
     </div>
   );
 }

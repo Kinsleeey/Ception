@@ -1,22 +1,40 @@
 import { useState } from "react";
 import { CloseIcon } from "../components/icons.jsx";
+import { addBarCategory } from "../api.js";
 
-// Add Category is a small modal with a single text field, opened from the
-// Add/Edit Drinks screen and closed via onClose.
-export default function NewCategory({ onClose }) {
-  const close = onClose;
+// Add Category is a small modal with a single text field. Saves to the backend.
+//
+// Props:
+//   onClose -> close the popup
+//   onSaved -> called after a successful save (refreshes the category list)
+export default function NewCategory({ onClose, onSaved }) {
   const [name, setName] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(null);
+
+  async function handleSave() {
+    if (!name.trim()) { setError("Please enter a category name."); return; }
+    try {
+      setBusy(true);
+      setError(null);
+      await addBarCategory(name.trim());
+      if (onSaved) onSaved(); else onClose();
+    } catch (err) {
+      setError(err.message);
+      setBusy(false);
+    }
+  }
 
   return (
-    <div className="modal-overlay" onClick={close}>
+    <div className="modal-overlay" onClick={onClose}>
       <div className="modal-card modal-card--sm" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2 className="modal-title">Add Category</h2>
           <div className="modal-subtitle">
-            <span>Bar 1</span>
+            <span>Bar</span>
           </div>
         </div>
-        <button className="modal-close" onClick={close} aria-label="Close">
+        <button className="modal-close" onClick={onClose} aria-label="Close">
           <CloseIcon size={14} />
         </button>
 
@@ -31,18 +49,15 @@ export default function NewCategory({ onClose }) {
               onChange={(e) => setName(e.target.value)}
             />
           </div>
+          {error && (
+            <p style={{ color: "#c0392b", fontSize: "14px" }}>{error}</p>
+          )}
         </div>
 
         <div className="form-modal-actions">
-          <button className="btn-pill-ghost" onClick={close}>Cancel</button>
-          <button
-            className="btn-pill-primary"
-            onClick={() => {
-              alert(`Added category "${name || "Untitled"}". (Demo — nothing is stored yet.)`);
-              close();
-            }}
-          >
-            Add Category
+          <button className="btn-pill-ghost" onClick={onClose} disabled={busy}>Cancel</button>
+          <button className="btn-pill-primary" onClick={handleSave} disabled={busy}>
+            {busy ? "Saving…" : "Add Category"}
           </button>
         </div>
       </div>

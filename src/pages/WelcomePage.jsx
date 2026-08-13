@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import Logo from "../components/Logo.jsx";
-import { BellIcon, ShieldIcon, CocktailIcon } from "../components/icons.jsx";
+import { BellIcon, ShieldIcon, CocktailIcon, GridIcon } from "../components/icons.jsx";
 
 // The three roles shown as cards. Keeping them in an array means the
 // JSX below stays short: we describe ONE card and let .map() repeat it.
@@ -27,21 +27,28 @@ const roles = [
     button: "Login as Bartender",
     Icon: CocktailIcon,
   },
+  {
+    id: "storekeeper",
+    title: "Store",
+    text: "Manage stock in store",
+    button: "Login as Storekeeper",
+    Icon: GridIcon,
+  },
 ];
 
 export default function WelcomePage() {
   return (
     <div className="welcome">
       <div className="welcome__inner">
-        {/* Brand */}
+        {/* Brand — the Ception wordmark carries its own subtitle, so no text
+            lines are needed next to it. */}
         <div className="welcome__brand">
-          <Logo />
-          <div className="welcome__brand-name">Premium Hotel</div>
+          <Logo height={32} />
         </div>
 
         {/* Headline */}
         <div>
-          <h1 className="welcome__heading">Welcome to Premium Hotel</h1>
+          <h1 className="welcome__heading">Welcome</h1>
           <p className="welcome__subheading">
             Sign in to manage operations, guests, and reservations
           </p>
@@ -67,7 +74,7 @@ export default function WelcomePage() {
         </div>
 
         <p className="welcome__footer">
-          © 2026 Premium Hotel. All rights reserved.
+          © 2026 Ception. All rights reserved.
         </p>
       </div>
     </div>

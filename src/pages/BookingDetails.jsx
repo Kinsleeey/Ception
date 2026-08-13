@@ -1,109 +1,157 @@
+import { useState, useEffect } from "react";
 import Modal from "../components/Modal.jsx";
 import GuestInfoCard from "../components/GuestInfoCard.jsx";
+import { getRoomGuest, getStayGuests } from "../api.js";
 
-// Booking Details is a modal opened from a booked room on the reception
-// dashboard. It renders over that page (blurred behind it) and closes via
-// the onClose prop.
+// Booking Details is opened from a booked room. It fetches the room's active
+// guest(s) on open and shows the booking facts, the check-in timeline, and a
+// card per guest (primary + any co-guests).
 //
-// The data is hard-coded for now. Later you'd pass the booking in as a prop
-// and look up the matching record.
-const booking = {
-  room: "RM 001",
-  pricePerNight: "₦60,000 per night",
-  duration: "3 Nights",
-  amountPaid: "₦180,000",
-  payment: "Cash",
-  checkIn: { date: "17 Jun 2026", time: "2:00 PM" },
-  checkOut: { date: "20 Jun 2026", time: "12:00 PM" },
-  guests: [
-    {
-      tag: "Guest 1",
-      fields: [
-        { label: "Full Name", value: "Emeka Okafor" },
-        { label: "Phone Number", value: "08012345678" },
-        { label: "Email", value: "emeka@gmail.com" },
-        { label: "Address", value: "12 Broad Street, Lagos" },
-      ],
-    },
-  ],
-};
+// Props:
+//   roomId     -> which room's booking to load
+//   onClose    -> close the popup
+//   onCheckout -> called when "Checkout Guest" is clicked (wired in the
+//                 dashboard to hit the API + refresh)
 
-export default function BookingDetails({ onClose }) {
-  const close = onClose;
+// --- Date/number helpers (same style as the reservation popup). ---
+function formatDate(ts) {
+  if (!ts) return "—";
+  return new Date(ts).toLocaleDateString("en-GB", {
+    day: "2-digit", month: "short", year: "numeric",
+  });
+}
+function formatTime(ts) {
+  if (!ts) return "";
+  return new Date(ts).toLocaleTimeString("en-US", {
+    hour: "numeric", minute: "2-digit", hour12: true,
+  });
+}
+function naira(n) {
+  if (n == null) return "—";
+  return "₦" + Number(n).toLocaleString();
+}
+
+export default function BookingDetails({ roomId, stayId, onClose, onCheckout }) {
+  const [guests, setGuests] = useState([]);   // array of guest rows from the API
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch the room's active guest(s) once, on open.
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        setLoading(true);
+        setError(null);
+        // Prefer stayId (history: a specific, possibly past stay).
+        // Fall back to roomId (dashboard: the room's active stay).
+        const rows = stayId ? await getStayGuests(stayId) : await getRoomGuest(roomId);
+        if (!cancelled) setGuests(rows);
+      } catch (err) {
+        if (!cancelled) setError(err.message);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    load();
+    return () => { cancelled = true; };
+  }, [roomId, stayId]);
+
+  // The stay-level facts (amount, payment, check-in time) are the same on every
+  // returned row, so we read them from the first guest.
+  const stay = guests[0] || null;
 
   const subtitle = (
     <>
-      <strong>{booking.room}</strong>
-      <span className="dot" />
-      <span>{booking.pricePerNight}</span>
+      <strong>Booked room</strong>
     </>
   );
 
   const footer = (
     <>
-      <button className="modal-btn modal-btn--ghost" onClick={close}>
+      <button className="modal-btn modal-btn--ghost" onClick={onClose}>
         Cancel
       </button>
-      <button
-        className="modal-btn modal-btn--solid"
-        onClick={() => alert("Check-out flow comes in a later batch.")}
-      >
-        Checkout Guest
-      </button>
+      {onCheckout && (
+        <button className="modal-btn modal-btn--solid" onClick={onCheckout} disabled={loading || !!error}>
+          Checkout Guest
+        </button>
+      )}
     </>
   );
 
+  // Turn each API guest row into the { tag, fields } shape GuestInfoCard wants.
+  // Primary guest is "Guest 1"; co-guests are numbered separately.
+  let coCount = 0;
+  const guestCards = guests.map((g, i) => {
+    const tag = g.is_primary ? "Guest 1" : `Co-guest ${++coCount}`;
+    return {
+      key: g.id ?? i,
+      tag,
+      fields: [
+        { label: "Full Name", value: g.name || "—" },
+        { label: "Phone Number", value: g.phone || "—" },
+        { label: "Email", value: g.email || "—" },
+        { label: "Address", value: g.address || "—" },
+      ],
+    };
+  });
+
   return (
-    <Modal title="Booking Details" subtitle={subtitle} onClose={close} footer={footer}>
-      {/* Booking facts */}
-      <div>
-        <div className="section-divider">
-          <span className="section-divider__label">Booking Details</span>
-          <span className="section-divider__line" />
-        </div>
-        <div className="detail-rows">
-          <div className="detail-row">
-            <span className="detail-row__label">Duration of Stay</span>
-            <span className="detail-row__value">{booking.duration}</span>
+    <Modal title="Booking Details" subtitle={subtitle} onClose={onClose} footer={footer}>
+      {loading ? (
+        <p style={{ padding: "24px", color: "#7b7487" }}>Loading booking…</p>
+      ) : error ? (
+        <p style={{ padding: "24px", color: "#c0392b" }}>Couldn’t load: {error}</p>
+      ) : (
+        <>
+          {/* Booking facts */}
+          <div>
+            <div className="section-divider">
+              <span className="section-divider__label">Booking Details</span>
+              <span className="section-divider__line" />
+            </div>
+            <div className="detail-rows">
+              <div className="detail-row">
+                <span className="detail-row__label">Amount Paid</span>
+                <span className="detail-row__value">{naira(stay?.amount_paid)}</span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-row__label">Mode of Payment</span>
+                <span className="detail-row__value">{stay?.payment_method || "—"}</span>
+              </div>
+            </div>
           </div>
-          <div className="detail-row">
-            <span className="detail-row__label">Amount Paid</span>
-            <span className="detail-row__value">{booking.amountPaid}</span>
-          </div>
-          <div className="detail-row">
-            <span className="detail-row__label">Mode of Payment</span>
-            <span className="detail-row__value">{booking.payment}</span>
-          </div>
-        </div>
-      </div>
 
-      {/* Check-in / check-out timeline */}
-      <div className="timeline">
-        <div>
-          <div className="timeline__label">Check-in</div>
-          <div className="timeline__date">{booking.checkIn.date}</div>
-          <div className="timeline__time">{booking.checkIn.time}</div>
-        </div>
-        <div className="timeline__connector" />
-        <div className="timeline__end">
-          <div className="timeline__label">Expected Check-out</div>
-          <div className="timeline__date">{booking.checkOut.date}</div>
-          <div className="timeline__time">{booking.checkOut.time}</div>
-        </div>
-      </div>
+          {/* Check-in timeline (expected check-out isn't stored yet). */}
+          <div className="timeline">
+            <div>
+              <div className="timeline__label">Check-in</div>
+              <div className="timeline__date">{formatDate(stay?.check_in)}</div>
+              <div className="timeline__time">{formatTime(stay?.check_in)}</div>
+            </div>
+            <div className="timeline__connector" />
+            <div className="timeline__end">
+              <div className="timeline__label">Expected Check-out</div>
+              <div className="timeline__date">{formatDate(stay?.expected_checkout)}</div>
+              <div className="timeline__time">{formatTime(stay?.expected_checkout)}</div>
+            </div>
+          </div>
 
-      {/* Guests */}
-      <div>
-        <div className="section-divider" style={{ marginBottom: "12px" }}>
-          <span className="section-divider__label">Guest Details</span>
-          <span className="section-divider__line" />
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-          {booking.guests.map((guest) => (
-            <GuestInfoCard key={guest.tag} tag={guest.tag} fields={guest.fields} />
-          ))}
-        </div>
-      </div>
+          {/* Guests (primary + co-guests) */}
+          <div>
+            <div className="section-divider" style={{ marginBottom: "12px" }}>
+              <span className="section-divider__label">Guest Details</span>
+              <span className="section-divider__line" />
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              {guestCards.map((guest) => (
+                <GuestInfoCard key={guest.key} tag={guest.tag} fields={guest.fields} />
+              ))}
+            </div>
+          </div>
+        </>
+      )}
     </Modal>
   );
 }
