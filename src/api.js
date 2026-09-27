@@ -73,6 +73,11 @@ export function getRoomGuest(roomId) {
   return request(`/api/rooms/${roomId}/guest`);
 }
 
+// Location, capacity and the full amenity list for one room.
+export function getRoomDetails(roomId) {
+  return request(`/api/rooms/${roomId}/details`);
+}
+
 export function checkOut(roomId) {
   return request(`/api/rooms/${roomId}/checkout`, { method: "POST" });
 }
@@ -390,4 +395,208 @@ export function topUpStockItem(id, amount) {
     method: "POST",
     body: JSON.stringify({ amount }),
   });
+}
+
+// ----- Accounting -----
+//
+// The accounting module reads from three sources: sales come from stays and
+// orders (queried live), expenses are their own table, and every movement of
+// cash lives in one money log. The overview stitches all of it together.
+
+// The 22-column overview table for one year. Returns raw monthly figures; the
+// frontend's derive() computes totals, profit and net from them.
+export function getAccountingOverview(year) {
+  const query = year ? `?year=${year}` : "";
+  return request(`/api/accounting/overview${query}`);
+}
+
+// One month's figures, day by day — what a month row expands into.
+export function getAccountingOverviewDaily(year, month) {
+  return request(`/api/accounting/overview/daily?year=${year}&month=${month}`);
+}
+
+// Sales rows, merged from stays and orders.
+// filters: { department, from, to, status }
+export function getAccountingSales(filters = {}) {
+  const params = new URLSearchParams();
+  for (const [k, v] of Object.entries(filters)) {
+    if (v && v !== "All") params.append(k, v);
+  }
+  const query = params.toString() ? `?${params.toString()}` : "";
+  return request(`/api/accounting/sales${query}`);
+}
+
+// The cashbook, with the running balance already computed server-side.
+// filters: { direction, kind, from, to }
+export function getCashMovements(filters = {}) {
+  const params = new URLSearchParams();
+  for (const [k, v] of Object.entries(filters)) {
+    if (v && v !== "All") params.append(k, v);
+  }
+  const query = params.toString() ? `?${params.toString()}` : "";
+  return request(`/api/accounting/cash${query}`);
+}
+
+// Paid (and voided) expenses for the main table.
+// filters: { from, to, category, q }
+export function getExpenses(filters = {}) {
+  const params = new URLSearchParams();
+  for (const [k, v] of Object.entries(filters)) {
+    if (v && v !== "All Categories") params.append(k, v);
+  }
+  const query = params.toString() ? `?${params.toString()}` : "";
+  return request(`/api/accounting/expenses${query}`);
+}
+
+// What's sitting on the Expenses Card, with a total and per-item outstanding.
+export function getUnpaidExpenses() {
+  return request("/api/accounting/expenses/unpaid");
+}
+
+// Category lists. type: "expense" | "addon" | "outgoing" (omit for all).
+export function getAcctCategories(type) {
+  const query = type ? `?type=${encodeURIComponent(type)}` : "";
+  return request(`/api/accounting/categories${query}`);
+}
+
+export function addAcctCategory(name, type) {
+  return request("/api/accounting/categories", {
+    method: "POST",
+    body: JSON.stringify({ name, type }),
+  });
+}
+
+// Record an expense. When `method` is "Expenses Card" the expense is saved as
+// unpaid and no cash movement is written — the money hasn't moved yet.
+export function addExpense(payload) {
+  return request("/api/accounting/expenses", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+// Settle an unpaid expense, in full or in part.
+export function payExpense(id, amount, method) {
+  return request(`/api/accounting/expenses/${id}/pay`, {
+    method: "POST",
+    body: JSON.stringify({ amount, method }),
+  });
+}
+
+// Void a same-day expense. The row stays (greyed, with the reason); its cash
+// movement is removed, because the money never actually left.
+export function voidExpense(id, reason) {
+  return request(`/api/accounting/expenses/${id}/void`, {
+    method: "PATCH",
+    body: JSON.stringify({ reason }),
+  });
+}
+
+// A manual add-on (money in) or out-going (money out) — the only movements with
+// no source elsewhere in the system.
+export function addMoneyMovement(payload) {
+  return request("/api/accounting/movements", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+// Record that a room has just been serviced. Clean/Dirty is derived from this.
+export function markRoomClean(roomId) {
+  return request(`/api/rooms/${roomId}/clean`, { method: "PATCH" });
+}
+
+// ----- Issues (any department) -----
+
+export function getIssues(department) {
+  const query = department ? `?department=${encodeURIComponent(department)}` : "";
+  return request(`/api/issues${query}`);
+}
+
+export function reportIssue(payload) {
+  return request("/api/issues", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateIssueStatus(id, status) {
+  return request(`/api/issues/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
+}
+
+// Everything that happened across the rooms on one day.
+export function getRoomActivity(date) {
+  const query = date ? `?date=${encodeURIComponent(date)}` : "";
+  return request(`/api/rooms/activity${query}`);
+}
+
+
+// ----- Stock requests (bar -> store) -----
+
+export function getStockRequests(barLocation) {
+  const query = barLocation ? `?bar_location=${encodeURIComponent(barLocation)}` : "";
+  return request(`/api/stock-requests${query}`);
+}
+
+export function createStockRequest(payload) {
+  return request("/api/stock-requests", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+// The store sends it — this is what drops store stock.
+export function deliverStockRequest(id) {
+  return request(`/api/stock-requests/${id}/deliver`, { method: "PATCH" });
+}
+
+// The bar confirms it arrived.
+export function receiveStockRequest(id) {
+  return request(`/api/stock-requests/${id}/receive`, { method: "PATCH" });
+}
+
+// A bar's day — sales, stock movements and faults.
+export function getBarActivity(date, barLocation) {
+  const params = new URLSearchParams();
+  if (date) params.append("date", date);
+  if (barLocation) params.append("bar_location", barLocation);
+  const query = params.toString() ? `?${params.toString()}` : "";
+  return request(`/api/bar/activity${query}`);
+}
+
+// The store's day — everything issued, returned, restocked, and any faults.
+export function getStoreActivity(date) {
+  const query = date ? `?date=${encodeURIComponent(date)}` : "";
+  return request(`/api/stock/activity${query}`);
+}
+
+// ----- Maintenance -----
+
+export function getMaintenanceRequests(status) {
+  const query = status ? `?status=${encodeURIComponent(status)}` : "";
+  return request(`/api/maintenance/requests${query}`);
+}
+
+// Maintenance asks the admin for money to fix a fault.
+export function requestMaintenancePayment(issueId, amount, reason) {
+  return request(`/api/issues/${issueId}/requests`, {
+    method: "POST",
+    body: JSON.stringify({ amount, reason }),
+  });
+}
+
+// The admin releases it. `method` decides whether the expense is settled now
+// or put on the Expenses Card.
+export function approveMaintenanceRequest(id, { category_id, method, vendor }) {
+  return request(`/api/maintenance/requests/${id}/approve`, {
+    method: "PATCH",
+    body: JSON.stringify({ category_id, method, vendor }),
+  });
+}
+
+export function declineMaintenanceRequest(id) {
+  return request(`/api/maintenance/requests/${id}/decline`, { method: "PATCH" });
 }

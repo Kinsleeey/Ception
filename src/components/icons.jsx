@@ -321,3 +321,116 @@ export function BoxIcon({ size = 18 }) {
     </svg>
   );
 }
+
+export function InfoIcon({ size = 12 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <path d="M12 16v-4M12 8h.01" />
+    </svg>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// DEPARTMENT ICONS — the welcome page's department cards.
+// These are FILLED, unlike most icons above, because the design uses a filled
+// set. They all inherit their colour from the parent via `currentColor`.
+// ---------------------------------------------------------------------------
+
+export function CallBellIcon({ size = 28 }) {
+  // Reception
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M12 4a1 1 0 0 1 1 1v.06A7 7 0 0 1 19 12v3h.5a1 1 0 1 1 0 2h-15a1 1 0 1 1 0-2H5v-3a7 7 0 0 1 6-6.94V5a1 1 0 0 1 1-1Z" />
+      <rect x="3" y="18.5" width="18" height="2.5" rx="1.25" />
+    </svg>
+  );
+}
+
+export function MartiniIcon({ size = 28 }) {
+  // Bar
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M20.7 4.3A1 1 0 0 0 20 3H4a1 1 0 0 0-.7 1.7L11 12.4V19H7.5a1 1 0 1 0 0 2h9a1 1 0 1 0 0-2H13v-6.6l7.7-8.1Z" />
+    </svg>
+  );
+}
+
+export function CookingPotIcon({ size = 28 }) {
+  // Kitchen
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M8.5 2.6a1 1 0 0 1 1.4.3L10.8 4h2.4l.9-1.1a1 1 0 1 1 1.6 1.2L15.8 5H19a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2h3.2l-.9-1.1a1 1 0 0 1 .2-1.3Z" />
+      <path d="M3 9a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1v5a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4v-5a1 1 0 0 1-1-1V9Z" />
+    </svg>
+  );
+}
+
+export function WarehouseIcon({ size = 28 }) {
+  // Conference Hall
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M2.4 8.1 11.6 3a1 1 0 0 1 .8 0l9.2 5.1a1 1 0 0 1 .4.9V20a1 1 0 0 1-1 1h-2v-9a1 1 0 0 0-1-1H6a1 1 0 0 0-1 1v9H3a1 1 0 0 1-1-1V9a1 1 0 0 1 .4-.9Z" />
+      <path d="M7 13h10v8H7v-8Zm2 2v1.5h6V15H9Zm0 3.5V20h6v-1.5H9Z" />
+    </svg>
+  );
+}
+
+export function TShirtIcon({ size = 28 }) {
+  // Laundry
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M9 3h6a3 3 0 0 1-6 0Zm-1.2.5L2.6 6.7a1 1 0 0 0-.4 1.2l1.4 3.6a1 1 0 0 0 1.3.6L7 11.3V20a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-8.7l2.1.8a1 1 0 0 0 1.3-.6l1.4-3.6a1 1 0 0 0-.4-1.2l-5.2-3.2a5 5 0 0 1-8.4 0Z" />
+    </svg>
+  );
+}
+
+export function SwimmerIcon({ size = 28 }) {
+  // Recreational Facilities
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <circle cx="17" cy="6" r="2.5" />
+      <path d="M6.6 11.1a1 1 0 0 1 .1-1.4l3.6-3a3 3 0 0 1 3.7-.1l3.4 2.5a1 1 0 0 1-1.2 1.6l-3.4-2.5a1 1 0 0 0-1.2 0l-1.4 1.2 3.3 2.4a1 1 0 0 1-.3 1.8l-5 1.3a1 1 0 0 1-.9-.2l-2.6-2.2a1 1 0 0 1 1.3-1.5l2.1 1.8.9-.2-2.3-1.7a1 1 0 0 1-.1 0Z" />
+      <path d="M2.5 18.2c1.4 0 1.4 1.1 2.9 1.1s1.4-1.1 2.9-1.1 1.4 1.1 2.9 1.1 1.4-1.1 2.9-1.1 1.4 1.1 2.9 1.1 1.4-1.1 2.9-1.1a1 1 0 1 0 0-2c-1.5 0-1.5 1.1-2.9 1.1s-1.4-1.1-2.9-1.1-1.4 1.1-2.9 1.1-1.4-1.1-2.9-1.1-1.4 1.1-2.9 1.1-1.4-1.1-2.9-1.1a1 1 0 0 0 0 2Z" />
+    </svg>
+  );
+}
+
+export function StorefrontIcon({ size = 28 }) {
+  // Store
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M4 3h16a1 1 0 0 1 .9.6l1.8 4A1 1 0 0 1 22 9h-1v10a2 2 0 0 1-2 2h-4v-6H9v6H5a2 2 0 0 1-2-2V9H2a1 1 0 0 1-.7-1.4l1.8-4A1 1 0 0 1 4 3Z" />
+    </svg>
+  );
+}
+
+export function LightningIcon({ size = 28 }) {
+  // Power
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M13.8 2.2a1 1 0 0 1 .7 1.1L13.6 9H19a1 1 0 0 1 .8 1.6l-9 12a1 1 0 0 1-1.8-.8L10 16H5a1 1 0 0 1-.8-1.6l9-12a1 1 0 0 1 .6-.2Z" />
+    </svg>
+  );
+}
+
+export function WrenchIcon({ size = 28 }) {
+  // Maintenance
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M21.3 5.6a1 1 0 0 0-1.6-.4l-2.6 2.6-2.1-.4-.4-2.1 2.6-2.6a1 1 0 0 0-.4-1.6 6.5 6.5 0 0 0-8.2 8.1l-6 6a2.8 2.8 0 0 0 4 4l6-6a6.5 6.5 0 0 0 8.1-8.2ZM5.5 19.5a1.2 1.2 0 1 1 0-2.4 1.2 1.2 0 0 1 0 2.4Z" />
+    </svg>
+  );
+}
+
+export function HeadCircuitIcon({ size = 28 }) {
+  // Admin
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M12 2a8.5 8.5 0 0 0-8.5 8.5c0 2 .7 3.6 1.5 4.7.4.6.5 1 .5 1.3V20a2 2 0 0 0 2 2h6.5a1 1 0 0 0 0-2H7.5v-3.5c0-.9-.3-1.7-.9-2.5A6.4 6.4 0 0 1 5.5 10.5 6.5 6.5 0 0 1 18.5 10a1 1 0 0 0 2 0A8.5 8.5 0 0 0 12 2Z" />
+      <path d="M15 11.5a2.5 2.5 0 1 1 1.6 2.3v1.4l2.6 1.5a1 1 0 0 1 .5.9v3.4a1 1 0 1 1-2 0v-2.8l-2.6-1.5a1 1 0 0 1-.5-.9v-2.2a2.5 2.5 0 0 1-.6-1.6Z" />
+      <circle cx="10" cy="9" r="1.5" />
+    </svg>
+  );
+}

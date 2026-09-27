@@ -1,77 +1,90 @@
 import { Link } from "react-router-dom";
 import Logo from "../components/Logo.jsx";
-import { BellIcon, ShieldIcon, CocktailIcon, GridIcon } from "../components/icons.jsx";
+import {
+  CallBellIcon, MartiniIcon, CookingPotIcon, WarehouseIcon, TShirtIcon,
+  SwimmerIcon, StorefrontIcon, LightningIcon, WrenchIcon, HeadCircuitIcon,
+} from "../components/icons.jsx";
 
-// The three roles shown as cards. Keeping them in an array means the
-// JSX below stays short: we describe ONE card and let .map() repeat it.
-// To add a 4th role, just add an object here.
-const roles = [
-  {
-    id: "receptionist",
-    title: "Receptionist",
-    text: "Manage check-ins, check-outs, and guest requests",
-    button: "Login as Receptionist",
-    Icon: BellIcon,
-  },
-  {
-    id: "admin",
-    title: "Admin",
-    text: "Oversee staff, reports, and hotel-wide settings",
-    button: "Login as Admin",
-    Icon: ShieldIcon,
-  },
-  {
-    id: "bartender",
-    title: "Bar",
-    text: "Manage drink inventory across all bars",
-    button: "Login as Bartender",
-    Icon: CocktailIcon,
-  },
-  {
-    id: "storekeeper",
-    title: "Store",
-    text: "Manage stock in store",
-    button: "Login as Storekeeper",
-    Icon: GridIcon,
-  },
+// The hotel's departments, as a 3x3 grid.
+//
+// `to` is the login route for departments that exist. The rest have no login,
+// no pages and no tables yet, so they carry `ready: false` and render greyed
+// and unclickable — a card that looks live and then does nothing is worse than
+// one that plainly isn't ready.
+//
+// To bring a department online later: build its pages, add its role to
+// LoginPage's roleContent, then set `ready: true` and give it a `to`.
+const departments = [
+  { id: "receptionist", title: "Reception",              Icon: CallBellIcon,   to: "/login/receptionist", ready: true },
+  { id: "bartender",    title: "Bar",                    Icon: MartiniIcon,    to: "/login/bartender",    ready: true },
+  { id: "kitchen",      title: "Kitchen",                Icon: CookingPotIcon, ready: false },
+  { id: "conference",   title: "Conference Hall",        Icon: WarehouseIcon,  ready: false },
+  { id: "laundry",      title: "Laundry",                Icon: TShirtIcon,     ready: false },
+  { id: "recreation",   title: "Recreational Facilities", Icon: SwimmerIcon,   ready: false },
+  { id: "storekeeper",  title: "Store",                  Icon: StorefrontIcon, to: "/login/storekeeper",  ready: true },
+  { id: "power",        title: "Power",                  Icon: LightningIcon,  ready: false },
+  { id: "maintenance",  title: "Maintenance",            Icon: WrenchIcon,     ready: false },
 ];
+
+// One card. Ready ones are links; the rest are inert, dimmed, and say why on
+// hover.
+function DepartmentCard({ dept }) {
+  const inner = (
+    <>
+      <span className="dept-card__icon"><dept.Icon size={28} /></span>
+      <span className="dept-card__title">{dept.title}</span>
+    </>
+  );
+
+  if (!dept.ready) {
+    return (
+      <div
+        className="dept-card dept-card--soon"
+        title={`${dept.title} isn't set up yet`}
+        aria-disabled="true"
+      >
+        {inner}
+        <span className="dept-card__soon">Coming soon</span>
+      </div>
+    );
+  }
+
+  return (
+    <Link className="dept-card" to={dept.to}>
+      {inner}
+    </Link>
+  );
+}
 
 export default function WelcomePage() {
   return (
     <div className="welcome">
       <div className="welcome__inner">
-        {/* Brand — the Ception wordmark carries its own subtitle, so no text
-            lines are needed next to it. */}
+        {/* Brand — the wordmark carries its own subtitle. */}
         <div className="welcome__brand">
-          <Logo height={32} />
+          <Logo height={36} />
         </div>
 
         {/* Headline */}
-        <div>
+        <div className="welcome__intro">
           <h1 className="welcome__heading">Welcome</h1>
-          <p className="welcome__subheading">
+          <p className="welcome__subheading" style={{fontSize:"12px"}}>
             Sign in to manage operations, guests, and reservations
           </p>
         </div>
 
-        {/* Role cards */}
-        <div className="role-cards">
-          {roles.map((role) => (
-            <div className="role-card" key={role.id}>
-              <div className="role-card__panel">
-                <div className="role-card__icon">
-                  <role.Icon size={24} />
-                </div>
-                <h2 className="role-card__title">{role.title}</h2>
-                <p className="role-card__text">{role.text}</p>
-                {/* Link sends the user to /login/<role>. */}
-                <Link className="btn" to={`/login/${role.id}`}>
-                  {role.button}
-                </Link>
-              </div>
-            </div>
+        {/* The departments, 3 across */}
+        <div className="dept-grid">
+          {departments.map((d) => (
+            <DepartmentCard key={d.id} dept={d} />
           ))}
         </div>
+
+        {/* Admin sits apart — it isn't a department, it oversees all of them. */}
+        <Link className="dept-card dept-card--admin" to="/login/admin">
+          <span className="dept-card__icon"><HeadCircuitIcon size={28} /></span>
+          <span className="dept-card__title">Manage as Admin</span>
+        </Link>
 
         <p className="welcome__footer">
           © 2026 Ception. All rights reserved.

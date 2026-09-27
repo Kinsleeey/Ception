@@ -1,7 +1,7 @@
 import { NavLink } from "react-router-dom";
 import SidebarShell from "./SidebarShell.jsx";
 import {
-  GridIcon, DoorIcon, UsersIcon, ChartIcon, AccountIcon, EditIcon, SettingsIcon,
+  GridIcon, MoneyIcon, DoorIcon, UsersIcon, ChartIcon, AccountIcon, EditIcon, SettingsIcon,
   BoxIcon, ReceiptIcon,
 } from "./icons.jsx";
 import Logo from "./Logo.jsx";
@@ -34,8 +34,17 @@ const sections = [
     label: "Accounts",
     links: [
       { name: "Account", to: "/account", Icon: AccountIcon },
-  ],
-},
+    ],
+  },
+  {
+    label: "Accounting",
+    links: [
+      { name: "Overview", to: "/accounting", Icon: ChartIcon },
+      { name: "Sales",    to: "/accounting/sales", Icon: MoneyIcon },
+      { name: "Cash",     to: "/accounting/cash", Icon: MoneyIcon },
+      { name: "Expenses", to: "/accounting/expenses", Icon: ReceiptIcon },
+    ],
+  },
 ];
 
 // NavLink calls this function with { isActive } and we return the class name.

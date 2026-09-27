@@ -1,7 +1,10 @@
 import { useMemo, useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { SearchIcon } from "../components/icons.jsx";
-import { getStockItems, getStockCategories, createStockMovement } from "../api.js";
+import { getStockItems, getStockCategories, createStockMovement , getStockRequests, getIssues} from "../api.js";
+import StockRequestsInbox from "../components/StockRequestsInbox.jsx";
+import DeptIssueModal from "../components/DeptIssueModal.jsx";
+import MyReportsModal from "../components/MyReportsModal.jsx";
 
 const COPY = {
   issue:  { panelTitle: "Stock to be issued",   partyLabel: "Issued to",     partyPlaceholder: "Enter recipient name or department", switchTo: "Return Stock" },
@@ -28,6 +31,29 @@ export default function StockMovement({ mode = "issue" }) {
 
   // ----- data from the database -----
   const [products, setProducts] = useState([]);
+
+  // The store's header controls: requests waiting to be granted, faults
+  // reported here, and the day's sheet.
+  const [storeModal, setStoreModal] = useState(null);  // "requests" | "report" | "reports"
+  const [pendingRequests, setPendingRequests] = useState(0);
+  const [openIssues, setOpenIssues] = useState(0);
+
+  async function loadRequestCount() {
+    try {
+      const d = await getStockRequests();
+      // Only what still needs the storekeeper to act — sent ones are done here.
+      setPendingRequests(d.counts?.Pending || 0);
+    } catch { setPendingRequests(0); }
+  }
+
+  async function loadIssueCount() {
+    try {
+      const d = await getIssues("Store");
+      setOpenIssues(d.openCount || 0);
+    } catch { setOpenIssues(0); }
+  }
+
+  useEffect(() => { loadRequestCount(); loadIssueCount(); }, []);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -39,30 +65,30 @@ export default function StockMovement({ mode = "issue" }) {
   const [selected, setSelected] = useState({}); // { [id]: { quantity, unit } }
   const [saving, setSaving] = useState(false);
 
-  // Fetch stock + categories. Pulled out of the effect so a save can call it
-  // again to refresh on-hand quantities after a movement.
+  // Pulled out of the effect so a save, or a granted request, can refresh the
+  // on-hand quantities without reloading the page.
   async function load() {
-    try {
-      setLoading(true);
-      setError(null);
-      const [rows, cats] = await Promise.all([getStockItems(), getStockCategories()]);
-      setProducts(
-        rows.map((r) => ({
-          id: r.id,
-          name: r.name,
-          subtitle: r.description || "",
-          category: r.category_name || "Uncategorised",
-          quantity: r.quantity,
-          unit: r.unit,
-          units: [r.unit],
-        }))
-      );
-      setCategories(cats.map((c) => c.name));
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+      try {
+        setLoading(true);
+        setError(null);
+        const [rows, cats] = await Promise.all([getStockItems(), getStockCategories()]);
+        setProducts(
+          rows.map((r) => ({
+            id: r.id,
+            name: r.name,
+            subtitle: r.description || "",
+            category: r.category_name || "Uncategorised",
+            quantity: r.quantity,
+            unit: r.unit,
+            units: [r.unit],
+          }))
+        );
+        setCategories(cats.map((c) => c.name));
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
   }
 
   useEffect(() => {
@@ -75,10 +101,9 @@ export default function StockMovement({ mode = "issue" }) {
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
     return products.filter((p) => {
-      const inStock = p.quantity > 0;                    // hide anything at 0 — can't issue it
       const inCategory = activeCategory === "All" || p.category === activeCategory;
       const matches = !q || p.name.toLowerCase().includes(q) || p.subtitle.toLowerCase().includes(q);
-      return inStock && inCategory && matches;
+      return inCategory && matches;
     });
   }, [products, activeCategory, query]);
 
@@ -120,9 +145,9 @@ export default function StockMovement({ mode = "issue" }) {
           unit,
         })),
       });
-      // Return to the normal empty state — no navigation. Clear the cart and
-      // the party field, and refresh stock so on-hand quantities reflect the
-      // movement just made. The storekeeper stays on this full-width screen.
+      // Back to the normal empty state — no navigation. Clear the cart and the
+      // party field, and refresh stock so the on-hand figures reflect the
+      // movement just made.
       setSelected({});
       setParty("");
       await load();
@@ -148,6 +173,40 @@ export default function StockMovement({ mode = "issue" }) {
         <div className="stock-header__brand">
           <BoxIcon />
           <h2 className="stock-header__title">Stock</h2>
+        </div>
+
+        <div className="stock-header__actions">
+          <button className="room-action-link" onClick={() => setStoreModal("requests")}>
+            Stock Requests
+          </button>
+          <button
+            className="issue-badge"
+            onClick={() => setStoreModal("requests")}
+            aria-label={`${pendingRequests} request${pendingRequests === 1 ? "" : "s"} awaiting`}
+            title="Requests awaiting"
+          >
+            {pendingRequests}
+          </button>
+
+          <span className="room-actions-row__divider" />
+
+          <button className="room-action-link" onClick={() => setStoreModal("report")}>
+            Report an Issue
+          </button>
+          <button
+            className="issue-badge"
+            onClick={() => setStoreModal("reports")}
+            aria-label={`${openIssues} open report${openIssues === 1 ? "" : "s"}`}
+            title="View reports"
+          >
+            {openIssues}
+          </button>
+
+          <span className="room-actions-row__divider" />
+
+          <Link className="room-action-link" to="/stock-activity">
+            Today's Activity
+          </Link>
         </div>
       </header>
 
@@ -293,6 +352,26 @@ export default function StockMovement({ mode = "issue" }) {
           </aside>
         )}
       </div>
+
+      {storeModal === "requests" && (
+        <StockRequestsInbox
+          onClose={() => setStoreModal(null)}
+          onChanged={async () => { await loadRequestCount(); await load(); }}
+        />
+      )}
+      {storeModal === "report" && (
+        <DeptIssueModal
+          department="Store"
+          whereLabel="Equipment or Area"
+          wherePlaceholder="e.g. cold room, shelving, weighing scale"
+          issuePlaceholder="e.g. Cold room not holding temperature"
+          onClose={() => setStoreModal(null)}
+          onSaved={async () => { setStoreModal(null); await loadIssueCount(); }}
+        />
+      )}
+      {storeModal === "reports" && (
+        <MyReportsModal department="Store" onClose={() => setStoreModal(null)} />
+      )}
     </div>
   );
 }

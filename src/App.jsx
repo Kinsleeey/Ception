@@ -15,7 +15,13 @@ import { IssueStock, ReturnStock } from "./pages/StockMovement.jsx";
 import Accounts from "./pages/Accounts.jsx";
 import Reservations from "./pages/Reservations.jsx";
 import ReservationCreate from "./pages/ReservationCreate.jsx";
-
+import AccountingOverview from "./pages/AccountingOverview.jsx";
+import AccountingSales from "./pages/AccountingSales.jsx";
+import AccountingCash from "./pages/AccountingCash.jsx";
+import AccountingExpenses from "./pages/AccountingExpenses.jsx";
+import TodaysActivity from "./pages/TodaysActivity.jsx";
+import BarActivity from "./pages/BarActivity.jsx";
+import StoreActivity from "./pages/StoreActivity.jsx";
 
 
 export default function App() {
@@ -50,9 +56,20 @@ export default function App() {
       {/* Accounts (admin) */}
       <Route path="/account" element={<Accounts />} />
 
+      {/* Accounting */}
+      <Route path="/accounting" element={<AccountingOverview />} />
+      <Route path="/accounting/sales" element={<AccountingSales />} />
+      <Route path="/accounting/cash" element={<AccountingCash />} />
+      <Route path="/accounting/expenses" element={<AccountingExpenses />} />
+
       {/* Multi-room reservation form (reception) */}
       <Route path="/reservations/new" element={<ReservationCreate />} />
       <Route path="/reservations" element={<Reservations />} />
+
+      {/* Activities */}
+      <Route path="/room-activity" element={<TodaysActivity />} />
+      <Route path="/bar-activity" element={<BarActivity />} />
+      <Route path="/stock-activity" element={<StoreActivity />} />
 
     </Routes>
   );

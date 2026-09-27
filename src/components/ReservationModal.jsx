@@ -97,13 +97,23 @@ export default function ReservationModal({ room, onClose, onDone }) {
     try {
       setBusy(true);
       setError(null);
+      // The reservations API takes a list of categories and quantities, since
+      // it also serves the multi-room form. A single reserve is just one
+      // category, quantity one — plus `room_id`, which tells the server to hold
+      // THIS room rather than auto-picking the first free one in the category.
       await createReservation({
-        room_id: room.id,
         guest_id: selectedGuest.id,
         start_date: startDate,      // datetime-local value; Postgres accepts it
         end_date: endDate,
-        amount_paid: amount,
         payment_method: payment,
+        rooms: [
+          {
+            category: room.category,
+            qty: 1,
+            amount,
+            room_id: room.id,
+          },
+        ],
       });
       if (onDone) onDone();
       else onClose();

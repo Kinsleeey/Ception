@@ -4,13 +4,17 @@ import TopBar from "../components/TopBar.jsx";
 import CategoryTabs from "../components/CategoryTabs.jsx";
 import StatusFilterPanel from "../components/StatusFilterPanel.jsx";
 import RoomCard from "../components/RoomCard.jsx";
+import RoomDetailsModal from "../components/RoomDetailsModal.jsx";
+import StatusLegendRibbon from "../components/StatusLegendRibbon.jsx";
+import ReportIssueModal from "../components/ReportIssueModal.jsx";
+import MyReportsModal from "../components/MyReportsModal.jsx";
 import GuestRegistration from "./GuestRegistration.jsx";
 import ReservationModal from "../components/ReservationModal.jsx";
 import BookingDetails from "./BookingDetails.jsx";
 import ConfirmModal from "../components/ConfirmModal.jsx";
 import { PlusIcon } from "../components/icons.jsx";
 import { CATEGORIES } from "../data/roomsData.js";        // keep the category list
-import { getRooms, checkOut, getRoomStatusCounts } from "../api.js";
+import { getRooms, checkOut, getRoomStatusCounts, getIssues } from "../api.js";
 
 
 export default function RoomDashboard() {
@@ -27,6 +31,24 @@ export default function RoomDashboard() {
 
  //for the pop ups
   const [modal, setModal] = useState(null); //which popup is currently open
+  // Which room's details popup is open, or null. Opened by the ⓘ on a card.
+  const [infoRoomId, setInfoRoomId] = useState(null);
+
+  // Issue reporting: which popup is open, and how many reports still need
+  // attention (the number in the circle).
+  const [issueModal, setIssueModal] = useState(null);   // "report" | "list" | null
+  const [openIssues, setOpenIssues] = useState(0);
+
+  async function loadIssueCount() {
+    try {
+      const d = await getIssues("Reception");
+      setOpenIssues(d.openCount || 0);
+    } catch {
+      setOpenIssues(0);
+    }
+  }
+
+  useEffect(() => { loadIssueCount(); }, []);
   const [activeRoom, setActiveRoom] = useState(null); //which room is that popup about
 
   
@@ -100,6 +122,24 @@ export default function RoomDashboard() {
           <Link className="room-action-link" to="/reservations">
             View Reservations
           </Link>
+
+          <span className="room-actions-row__divider" />
+
+          <button className="room-action-link" onClick={() => setIssueModal("report")}>
+            Report an Issue
+          </button>
+          <Link className="room-action-link" to="/room-activity">
+            Today's Activity
+          </Link>
+          {/* The circle shows how many reports still need attention. */}
+          <button
+            className="issue-badge"
+            onClick={() => setIssueModal("list")}
+            aria-label={`${openIssues} open report${openIssues === 1 ? "" : "s"}`}
+            title="View reports"
+          >
+            {openIssues}
+          </button>
         </div>
 
         <CategoryTabs categories={CATEGORIES} active={category} onChange={setCategory} />
@@ -107,6 +147,8 @@ export default function RoomDashboard() {
         <p className="room-caption">
           All <strong>{status}</strong> rooms for <strong>{category}</strong>.
         </p>
+
+        <StatusLegendRibbon />
 
         <div className="room-layout">
           <StatusFilterPanel counts={counts} active={status} onChange={setStatus} />
@@ -128,6 +170,7 @@ export default function RoomDashboard() {
               {rooms.map((room) => (
                 <RoomCard
                   key={room.id}
+                  onInfo={(r) => setInfoRoomId(r.id)}
                   room={room}
                   actions={actionsForRoom(room)}
                 />
@@ -171,6 +214,21 @@ export default function RoomDashboard() {
           You are about to check out the guest in <strong>{activeRoom?.number}</strong>.
           This will mark the room as available.
         </ConfirmModal>
+      )}
+
+      {infoRoomId && (
+        <RoomDetailsModal roomId={infoRoomId} onClose={() => setInfoRoomId(null)} />
+      )}
+
+      {issueModal === "report" && (
+        <ReportIssueModal
+          rooms={rooms}
+          onClose={() => setIssueModal(null)}
+          onSaved={async () => { setIssueModal(null); await loadIssueCount(); }}
+        />
+      )}
+      {issueModal === "list" && (
+        <MyReportsModal onClose={() => setIssueModal(null)} />
       )}
     </div>
   );

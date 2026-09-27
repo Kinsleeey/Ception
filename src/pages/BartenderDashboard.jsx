@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import BarSidebar from "../components/BarSidebar.jsx";
 import OrderPanel from "../components/OrderPanel.jsx";
 import ConfirmModal from "../components/ConfirmModal.jsx";
@@ -6,7 +7,13 @@ import { ArrowLeftIcon, SearchIcon } from "../components/icons.jsx";
 import {
   getProducts, getBarCategories, getCart,
   addToCart, updateCartItem, removeCartItem, checkoutOrder, getAccounts,
+  getStockRequests, getIssues,
 } from "../api.js";
+import BarReceipt from "../components/BarReceipt.jsx";
+import RequestStockModal from "../components/RequestStockModal.jsx";
+import StockRequestsModal from "../components/StockRequestsModal.jsx";
+import DeptIssueModal from "../components/DeptIssueModal.jsx";
+import MyReportsModal from "../components/MyReportsModal.jsx";
 
 // The bartender's product list. The selected BAR lives here (lifted from the
 // sidebar) and drives everything: which drinks to fetch and which cart to show.
@@ -32,6 +39,39 @@ export default function BartenderDashboard() {
   const [busy, setBusy] = useState(false);
 
   const [accounts, setAccounts] = useState([]);
+
+  const [receiptId, setReceiptId] = useState(null);
+
+  // Stock requests: which popup is open, and how many are still outstanding
+  // (pending or delivered-but-not-confirmed) for the number in the circle.
+  const [stockModal, setStockModal] = useState(null);   // "request" | "list" | null
+  const [openRequests, setOpenRequests] = useState(0);
+
+  async function loadRequestCount() {
+    try {
+      const d = await getStockRequests(location);
+      setOpenRequests(d.openCount || 0);
+    } catch {
+      setOpenRequests(0);
+    }
+  }
+
+  useEffect(() => { loadRequestCount(); }, [location]);
+
+  // Faults reported at this bar.
+  const [issueModal, setIssueModal] = useState(null);   // "report" | "list" | null
+  const [openIssues, setOpenIssues] = useState(0);
+
+  async function loadIssueCount() {
+    try {
+      const d = await getIssues("Bar");
+      setOpenIssues(d.openCount || 0);
+    } catch {
+      setOpenIssues(0);
+    }
+  }
+
+  useEffect(() => { loadIssueCount(); }, []);
 
   useEffect(() => {
     getAccounts()
@@ -112,16 +152,15 @@ export default function BartenderDashboard() {
     }
   }
 
-  // Print Receipt -> save the order -> cart comes back empty.
-  // Print Receipt -> save the order with the chosen method -> cart comes back.
-  // If an account charge is rejected (over its credit floor), the order is NOT
-  // saved and the cart is left intact so the bartender can pick another method.
   async function handlePrint(method) {
     try {
       setBusy(true);
-      await checkoutOrder(location, method);
+      const order = await checkoutOrder(location, method);
       setConfirmPrint(false);
       await refreshCart();
+      // Show the receipt for the sale just made.
+      // The checkout route returns `order_id`, not `id`.
+      if (order?.order_id) setReceiptId(order.order_id);
     } catch (err) {
       alert(`Checkout failed: ${err.message}`);
     } finally {
@@ -156,6 +195,42 @@ export default function BartenderDashboard() {
         <header className="topbar topbar--bordered">
           <ArrowLeftIcon size={20} />
           <span className="topbar__title">Products — {location}</span>
+
+          {/* Stock requests live in the top bar because they're about this bar
+              as a whole, not about the cart. */}
+          <div className="bar-topbar__actions">
+            <button className="room-action-link" onClick={() => setStockModal("request")}>
+              Request Stock
+            </button>
+            <button
+              className="issue-badge"
+              onClick={() => setStockModal("list")}
+              aria-label={`${openRequests} open request${openRequests === 1 ? "" : "s"}`}
+              title="View requests"
+            >
+              {openRequests}
+            </button>
+
+            <span className="room-actions-row__divider" />
+
+            <button className="room-action-link" onClick={() => setIssueModal("report")}>
+              Report an Issue
+            </button>
+            <button
+              className="issue-badge"
+              onClick={() => setIssueModal("list")}
+              aria-label={`${openIssues} open report${openIssues === 1 ? "" : "s"}`}
+              title="View reports"
+            >
+              {openIssues}
+            </button>
+
+            <span className="room-actions-row__divider" />
+
+            <Link className="room-action-link" to="/bar-activity">
+              Today's Activity
+            </Link>
+          </div>
         </header>
 
         <div className="bar-layout">
@@ -257,6 +332,44 @@ export default function BartenderDashboard() {
         >
           This will save the order for {location} ({pendingMethod}) and clear the current cart.
         </ConfirmModal>
+      )}
+
+      {stockModal === "request" && (
+        <RequestStockModal
+          barLocation={location}
+          onClose={() => setStockModal(null)}
+          onSaved={async () => { setStockModal(null); await loadRequestCount(); }}
+        />
+      )}
+      {stockModal === "list" && (
+        <StockRequestsModal
+          barLocation={location}
+          onClose={() => setStockModal(null)}
+          onChanged={loadRequestCount}
+        />
+      )}
+
+      {issueModal === "report" && (
+        <DeptIssueModal
+          department="Bar"
+          place={location}
+          wherePlaceholder="e.g. under-counter fridge, blender, draught tap"
+          issuePlaceholder="e.g. Fridge is not holding temperature overnight"
+          onClose={() => setIssueModal(null)}
+          onSaved={async () => { setIssueModal(null); await loadIssueCount(); }}
+        />
+      )}
+
+      {issueModal === "list" && (
+        <MyReportsModal department="Bar" onClose={() => setIssueModal(null)} />
+      )}
+
+      {receiptId && (
+        <BarReceipt
+          orderId={receiptId}
+          autoPrint
+          onClose={() => setReceiptId(null)}
+        />
       )}
     </div>
   );

@@ -1,15 +1,80 @@
 /* =================================================================
-   PREMIUM HOTEL — STYLES
+   CEPTION — STYLES
    =================================================================
-   This single CSS file styles the whole app.
+   One stylesheet for the whole app.
 
-   It starts with "design tokens": named values (colors, spacing, etc.)
-   pulled straight from the Figma file. Using tokens means you change a
-   color in ONE place and it updates everywhere.
+   It opens with "design tokens": named values (colours, spacing, radii)
+   taken from the Figma file. Change a colour in ONE place here and it
+   updates everywhere.
 
-   Class names are plain and descriptive (.btn, .card, .input...).
-   Search this file for a class name to find where it's styled.
+   Class names are plain and descriptive (.btn, .card, .input...), so
+   searching this file for a class name finds where it's styled.
+
+   HOW IT'S ORDERED
+     - tokens, reset, and reusable pieces
+     - one section per screen, roughly in the order they were built
+     - two polish layers near the middle that deliberately override
+       earlier rules, so anything re-declared there is intentional
+     - print rules at the very end
+
+   ADDING TO THIS FILE
+   When a block is given to you as a replacement, REPLACE the old one
+   rather than appending. Appending is how this file came to hold the
+   accounting styles three times over: 780 lines of rules silently
+   overriding each other.
+
+   CONTENTS  (search the name to jump there)
+     WELCOME / ROLE SELECTION PAGE
+     DEPARTMENT CARDS — three across, each an icon beside its name.
+     LOGIN PAGE
+     ADMIN DASHBOARD
+     RECEPTION — ROOM DASHBOARD
+     RECEPTION — OVERVIEW DASHBOARD
+     MODAL SYSTEM
+     ROOM DASHBOARD & ROOM DETAILS
+     GUEST DATABASE
+     DETAIL MODALS
+     FORM CONTROLS used in the registration / reservation modals
+     ADMIN SETTINGS
+     BAR MODULE
+     BAR MANAGEMENT
+     SMALL FORM MODAL
+     ORDER DETAILS MODAL
+     CONFIRM MODAL
+     ROOM DETAILS — disable / activate state
+     EDIT ROOM DETAILS MODAL
+     GUEST DETAILS MODAL
+     BAR REPORT
+     BARTENDER DASHBOARD refinements
+     RESERVATION MODAL
+     RESERVATION DETAILS
+     GUEST DETAILS POPUP
+     BARTENDER ORDER PANEL
+     ★ RESPONSIVE + POLISH LAYER
+     ★ DESIGN POLISH LAYER
+     DESKTOP REQUIRED
+     STORE — Issue / Return screen
+     ACCOUNTS
+     RESERVATIONS
+     ROOM DASHBOARD — the two links above the category tabs
+     RESERVATIONS PAGE — table matched to the Figma spec
+     ACCOUNTING — SALES
+     ACCOUNTING — CASH
+     ACCOUNTING — EXPENSES
+     OUTSTANDING EXPENSES POPUP
+     ACCOUNTING OVERVIEW
+     ACCOUNTING ENTRY POPUPS
+     OVERVIEW — the day view
+     ROOM DETAILS POPUP
+     HOUSEKEEPING — clean / dirty
+     ROOM ISSUES — report form, reports list, and the badge
+     THERMAL RECEIPT — 80mm
+     PRINTING THE RECEIPT
+     STOCK REQUESTS — the bar's request form and its history
+     TODAY'S ACTIVITY
+     PRINT
    ================================================================= */
+
 
 /* ---------- 1. DESIGN TOKENS (the values from Figma) ---------- */
 :root {
@@ -296,7 +361,7 @@ a:focus-visible {
 }
 
 /* =================================================================
-   4. WELCOME / ROLE SELECTION PAGE  (pages/WelcomePage.jsx)
+   WELCOME / ROLE SELECTION PAGE  (pages/WelcomePage.jsx)
    ================================================================= */
 .welcome {
   min-height: 100%;
@@ -308,7 +373,7 @@ a:focus-visible {
 }
 .welcome__inner {
   width: 100%;
-  max-width: 900px;
+  max-width: 1046px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -340,54 +405,102 @@ a:focus-visible {
   margin-top: var(--space-3);
 }
 
-/* The 3 role cards sit in a row, and wrap to a column on small screens */
-.role-cards {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-6);
-  width: 100%;
-  flex-wrap: wrap;
-}
-.role-card {
-  flex: 1 1 260px; /* grow, shrink, min width before wrapping */
-  display: flex;
-}
-/* the pale panel inside each role card */
-.role-card__panel {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-card);
-  padding: 33px;
-  width: 100%;
+/* The heading and its line sit closer together than the page's other gaps. */
+.welcome__intro {
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-align: center;
+  gap: var(--space-3);
 }
-.role-card__icon {
+.welcome__intro .welcome__subheading { margin-top: 0; }
+
+/* ---------------------------------------------------------------------------
+   DEPARTMENT CARDS — three across, each an icon beside its name.
+   The whole card is the click target, so there's no button inside.
+   --------------------------------------------------------------------------- */
+.dept-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+  width: 100%;
+}
+
+.dept-card {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 56px;
-  height: 56px;
-  border-radius: var(--radius-pill);
-  background: var(--purple);
-  color: var(--white);
-  box-shadow: var(--shadow-btn);
-  margin-bottom: var(--space-6);
+  gap: var(--space-3);
+  padding: 17px;
+  min-height: 66px;
+  background: #f0f3ff;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  text-decoration: none;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
 }
-.role-card__title {
+.dept-card:hover {
+  background: #e7ecff;
+  border-color: var(--purple-strong);
+  transform: translateY(-1px);
+}
+.dept-card:focus-visible {
+  outline: 2px solid var(--purple-strong);
+  outline-offset: 2px;
+}
+
+.dept-card__icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--purple-strong);
+}
+.dept-card__title {
   font-size: 20px;
   font-weight: 600;
+  line-height: 28px;
   color: var(--text-dark);
-  margin-bottom: var(--space-3);
 }
-.role-card__text {
-  font-size: 12px;
-  color: var(--text-body);
-  margin-bottom: var(--space-8);
-  flex-grow: 1; /* pushes the button to the bottom so all buttons line up */
+
+/* Admin isn't a department — it oversees them, so it sits apart and wider. */
+.dept-card--admin {
+  justify-content: center;
+  width: 590px;
+  max-width: 100%;
+  margin: 0 auto;
 }
+
+/* Departments with nothing behind them yet. Dimmed, not clickable, and
+   labelled — a card that looks live and then does nothing is worse than one
+   that plainly says it isn't ready. */
+.dept-card--soon {
+  position: relative;
+  opacity: 0.45;
+  cursor: not-allowed;
+  background: var(--card-grey, #f3f2f6);
+}
+.dept-card--soon:hover {
+  background: var(--card-grey, #f3f2f6);
+  border-color: var(--border);
+  transform: none;
+}
+.dept-card--soon .dept-card__icon { color: var(--text-muted); }
+.dept-card__soon {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .dept-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dept-card__title { font-size: 17px; }
+}
+@media (max-width: 600px) {
+  .dept-grid { grid-template-columns: 1fr; }
+}
+
 .welcome__footer {
   font-size: 12px;
   font-weight: 600;
@@ -395,7 +508,7 @@ a:focus-visible {
 }
 
 /* =================================================================
-   5. LOGIN PAGE  (pages/LoginPage.jsx)
+   LOGIN PAGE  (pages/LoginPage.jsx)
    ================================================================= */
 .login {
   min-height: 100%;
@@ -476,7 +589,7 @@ a:focus-visible {
 }
 
 /* =================================================================
-   6. ADMIN DASHBOARD  (pages/AdminDashboard.jsx + components/Sidebar.jsx)
+   ADMIN DASHBOARD  (pages/AdminDashboard.jsx + components/Sidebar.jsx)
    ================================================================= */
 .dashboard {
   min-height: 100%;
@@ -688,7 +801,7 @@ a:focus-visible {
 }
 
 /* =================================================================
-   7. RECEPTION — ROOM DASHBOARD  (pages/RoomDashboard.jsx)
+   RECEPTION — ROOM DASHBOARD  (pages/RoomDashboard.jsx)
    ================================================================= */
 .room-dash {
   min-height: 100%;
@@ -745,6 +858,7 @@ a:focus-visible {
 /* category tabs (Executive / VIP / Standard) */
 .cat-tabs {
   display: flex;
+  flex-wrap: wrap;            /* 8 categories don't fit one row */
   gap: var(--space-2);
   padding: var(--space-8) 0 var(--space-4);
 }
@@ -950,7 +1064,7 @@ a:focus-visible {
 }
 
 /* =================================================================
-   8. RECEPTION — OVERVIEW DASHBOARD (pages/ReceptionDashboard.jsx)
+   RECEPTION — OVERVIEW DASHBOARD (pages/ReceptionDashboard.jsx)
    ================================================================= */
 .reception {
   min-height: 100%;
@@ -1106,7 +1220,7 @@ a:focus-visible {
 }
 
 /* =================================================================
-   9. MODAL SYSTEM  (components/Modal.jsx + reception modals)
+   MODAL SYSTEM  (components/Modal.jsx + reception modals)
    ================================================================= */
 /* dim + blur the background behind any modal */
 .modal-overlay {
@@ -1454,7 +1568,7 @@ a:focus-visible {
 }
 
 /* =================================================================
-   7. ROOM DASHBOARD & ROOM DETAILS  (shared reception/admin pieces)
+   ROOM DASHBOARD & ROOM DETAILS  (shared reception/admin pieces)
    pages/RoomDashboard.jsx, pages/RoomDetails.jsx
    components/TopBar.jsx, CategoryTabs.jsx, StatusFilterPanel.jsx, RoomCard.jsx
    ================================================================= */
@@ -1523,6 +1637,7 @@ a:focus-visible {
 /* ----- Category tabs (Executive / VIP / Standard) ----- */
 .category-tabs {
   display: flex;
+  flex-wrap: wrap;            /* 8 categories don't fit one row */
   gap: var(--space-2);
   padding: var(--space-8) 0 var(--space-4);
 }
@@ -1738,7 +1853,7 @@ a:focus-visible {
 }
 
 /* =================================================================
-   8. GUEST DATABASE  (pages/GuestDatabase.jsx)
+   GUEST DATABASE  (pages/GuestDatabase.jsx)
    ================================================================= */
 .leaderboard {
   width: 100%;
@@ -1887,7 +2002,7 @@ a:focus-visible {
 }
 
 /* =================================================================
-   9. DETAIL MODALS  (components/Modal.jsx, pages/BookingDetails.jsx,
+   DETAIL MODALS  (components/Modal.jsx, pages/BookingDetails.jsx,
    pages/ReservationDetails.jsx)
    ================================================================= */
 .modal-overlay {
@@ -2101,7 +2216,7 @@ a:focus-visible {
 }
 
 /* =================================================================
-   10. FORM CONTROLS used in the registration / reservation modals
+   FORM CONTROLS used in the registration / reservation modals
    ================================================================= */
 /* pill-shaped form field (input or select) on the lavender background */
 .field {
@@ -2230,7 +2345,7 @@ a:focus-visible {
 }
 
 /* =================================================================
-   11. ADMIN SETTINGS  (pages/AdminSettings.jsx)
+   ADMIN SETTINGS  (pages/AdminSettings.jsx)
    ================================================================= */
 .settings-sections {
   display: flex;
@@ -2370,7 +2485,7 @@ a:focus-visible {
 }
 
 /* =================================================================
-   12. BAR MODULE  (pages/BartenderDashboard.jsx, pages/BarReport.jsx)
+   BAR MODULE  (pages/BartenderDashboard.jsx, pages/BarReport.jsx)
    components/BarSidebar.jsx
    ================================================================= */
 /* The bartender's sidebar lists bar locations instead of admin sections */
@@ -2494,7 +2609,7 @@ a:focus-visible {
 }
 
 /* =================================================================
-   13. BAR MANAGEMENT  (pages/BarEditDrinks.jsx)
+   BAR MANAGEMENT  (pages/BarEditDrinks.jsx)
    The admin-style "Add/Edit Drinks" screen: bigger product cards with
    edit/delete actions, a dashed "add product" button, and a
    "create category" link at the end of the filter pills.
@@ -2698,7 +2813,7 @@ a:focus-visible {
 }
 
 /* =================================================================
-   14. SMALL FORM MODAL  (New/Edit Product, New Category)
+   SMALL FORM MODAL  (New/Edit Product, New Category)
    A 480px modal with floating-style labels above lavender pill inputs.
    Reuses .modal-overlay from section 9.
    ================================================================= */
@@ -2800,7 +2915,7 @@ textarea.pill-input {
 }
 
 /* =================================================================
-   15. ORDER DETAILS MODAL  (pages/BarOrderDetails.jsx)
+   ORDER DETAILS MODAL  (pages/BarOrderDetails.jsx)
    ================================================================= */
 .order-summary {
   display: flex;
@@ -2904,7 +3019,7 @@ textarea.pill-input {
 }
 
 /* =================================================================
-   16. CONFIRM MODAL  (components/ConfirmModal.jsx)
+   CONFIRM MODAL  (components/ConfirmModal.jsx)
    Two variants: "danger" (delete, red) and "default" (confirm, purple).
    ================================================================= */
 .confirm-card {
@@ -3020,7 +3135,7 @@ textarea.pill-input {
 }
 
 /* =================================================================
-   17. ROOM DETAILS — disable / activate state
+   ROOM DETAILS — disable / activate state
    When a room is disabled, its details blur out and the primary
    button reads "Activate"; otherwise it reads "Disable".
    ================================================================= */
@@ -3033,7 +3148,7 @@ textarea.pill-input {
 }
 
 /* =================================================================
-   18. EDIT ROOM DETAILS MODAL  (label / value rows)
+   EDIT ROOM DETAILS MODAL  (label / value rows)
    ================================================================= */
 .edit-rows {
   display: flex;
@@ -3082,7 +3197,7 @@ textarea.pill-input {
 }
 
 /* =================================================================
-   19. GUEST DETAILS MODAL
+   GUEST DETAILS MODAL
    ================================================================= */
 .guest-modal-head {
   display: flex;
@@ -3115,7 +3230,7 @@ textarea.pill-input {
 }
 
 /* =================================================================
-   20. BAR REPORT ("Record") — greeting, cards, two tables
+   BAR REPORT ("Record") — greeting, cards, two tables
    ================================================================= */
 .record-greeting__title {
   font-size: 36px;
@@ -3298,7 +3413,7 @@ textarea.pill-input {
 }
 
 /* =================================================================
-   21. BARTENDER DASHBOARD refinements (match Figma exactly)
+   BARTENDER DASHBOARD refinements (match Figma exactly)
    ================================================================= */
 /* the Products header uses a full-strength bottom border */
 .topbar--bordered {
@@ -3311,7 +3426,7 @@ textarea.pill-input {
 }
 
 /* =================================================================
-   22. RESERVATION MODAL  (frames 88:3324 / 88:3507)
+   RESERVATION MODAL  (frames 88:3324 / 88:3507)
    Reuses .modal-card, .segmented, .pill-input, .pill-readout.
    ================================================================= */
 /* a date/time field: pill input with a trailing calendar icon */
@@ -3434,7 +3549,7 @@ textarea.pill-input {
 .link-cancel-addition:hover { text-decoration: underline; }
 
 /* =================================================================
-   23. RESERVATION DETAILS (VIEW) MODAL  (frame 88:3853)
+   RESERVATION DETAILS (VIEW) MODAL  (frame 88:3853)
    ================================================================= */
 /* the start/end date split with a dashed connector */
 .res-dates {
@@ -3516,7 +3631,7 @@ textarea.pill-input {
 }
 
 /* =================================================================
-   24. GUEST DETAILS POPUP  (frame 98:3900)
+   GUEST DETAILS POPUP  (frame 98:3900)
    A 600px modal: centered avatar header, summary strip, personal
    details rows, and a stay-history list with expandable co-guests.
    ================================================================= */
@@ -3775,7 +3890,7 @@ textarea.pill-input {
 }
 
 /* =================================================================
-   25. BARTENDER ORDER PANEL  (Frame 24 / node 155:206)
+   BARTENDER ORDER PANEL  (Frame 24 / node 155:206)
    Products area + a "Current Order" sidebar on the right.
    ================================================================= */
 /* the products column and the order panel sit side by side under the topbar */
@@ -4518,7 +4633,7 @@ textarea:focus-visible,
 }
 
 /* =================================================================
-   26. DESKTOP REQUIRED  (components/MobileGuard.jsx)
+   DESKTOP REQUIRED  (components/MobileGuard.jsx)
    Shown instead of the app on phone-sized viewports. Centered both
    ways, polished, and responsive down to very small screens.
    ================================================================= */
@@ -5073,8 +5188,6 @@ textarea:focus-visible,
 .multi-reserve-link:hover { text-decoration: underline; }
 /* Let the 8 category pills wrap onto a second row. Add flex-wrap to BOTH
    (your file defines two tab rules; I can't tell which the dashboard uses). */
-.category-tabs { flex-wrap: wrap; }
-.cat-tabs      { flex-wrap: wrap; }
 
 /* =========================================================================
    RESERVATIONS
@@ -5190,10 +5303,6 @@ textarea:focus-visible,
 @media (max-width: 900px) {
   .reserve-grid--2 { grid-template-columns: 1fr; }
 }
-
-/* Let the 8 category pills wrap. Add to BOTH tab rules. */
-.category-tabs { flex-wrap: wrap; }
-.cat-tabs      { flex-wrap: wrap; }
 
 /* =========================================================================
    ROOM DASHBOARD — the two links above the category tabs
@@ -5404,3 +5513,2585 @@ textarea:focus-visible,
 }
 .resv-action--cancel { color: #ba1a1a; }
 .resv-action:not(:disabled):hover { text-decoration: underline; }
+
+/* =========================================================================
+   ACCOUNTING — SALES
+   Colours taken from the Figma spec; spacing and tokens from the system.
+   ========================================================================= */
+
+/* The page title is purple here, unlike other topbars. */
+.sales-title { color: #4800a0; }
+
+/* ---- Filter row: department chips left, dates right ---- */
+.sales-filters {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: var(--space-4);
+}
+.sales-chips { display: flex; align-items: center; gap: 8px; }
+.sales-chip {
+  padding: 5px 17px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--bg-sidebar);
+  font: inherit;
+  font-size: 14px;
+  color: var(--text-body);
+  cursor: pointer;
+}
+.sales-chip:hover { border-color: var(--purple-strong); }
+.sales-chip--active {
+  background: var(--purple-strong);
+  border-color: var(--purple-strong);
+  color: #cdb4ff;
+  font-weight: 500;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+}
+
+/* Date range */
+.sales-dates { display: flex; align-items: center; gap: 8px; }
+.sales-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: 144px;
+  padding: 5px 9px 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--white);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.sales-date input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  color: #1e1928;
+  cursor: pointer;
+}
+.sales-date input:focus { outline: none; }
+.sales-dates__to { font-size: 14px; color: var(--text-body); }
+
+/* ---- Status sub-filter: smaller, secondary ---- */
+.sales-substatus { display: flex; align-items: center; gap: 4px; width: 100%; }
+.sales-subchip {
+  padding: 5px 13px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--white);
+  font: inherit;
+  font-size: 12px;
+  color: var(--text-body);
+  cursor: pointer;
+}
+.sales-subchip:hover { border-color: var(--purple-strong); }
+.sales-subchip--active {
+  background: var(--purple-strong);
+  border-color: var(--purple-strong);
+  color: #cdb4ff;
+  font-weight: 500;
+}
+
+/* ---- Totals strip (right aligned) ---- */
+.sales-stats-wrap { display: flex; justify-content: flex-end; width: 100%; }
+.sales-stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-6);
+  padding: 9px 25px;
+  background: var(--bg-sidebar);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.04);
+}
+.sales-stat { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.sales-stat__label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: -0.55px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.sales-stat__value {
+  font-family: "Liberation Mono", ui-monospace, monospace;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--purple-strong);
+}
+.sales-stats__divider { width: 1px; height: 40px; background: var(--border); }
+
+/* ---- Table ---- */
+.sales-card {
+  width: 100%;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.04);
+}
+.sales-table { width: 100%; border-collapse: collapse; }
+.sales-table thead tr {
+  background: var(--bg-sidebar);
+  border-bottom: 1px solid var(--border);
+}
+.sales-table th {
+  padding: 8px 16px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: -0.55px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.sales-table td {
+  padding: 16px;
+  border-top: 1px solid rgba(204, 195, 216, 0.5);
+  font-size: 14px;
+  color: var(--text-body);
+  vertical-align: middle;
+}
+.sales-table tbody tr:first-child td { border-top: 0; }
+.sales-table .is-right  { text-align: right; }
+.sales-table .is-center { text-align: center; }
+
+/* Unpaid rows carry a faint red wash. */
+.sales-row--unpaid { background: rgba(255, 218, 214, 0.1); }
+
+.sales-empty { padding: 24px; color: var(--text-muted); text-align: center; }
+
+.sales-date-main { font-size: 14px; color: #1e1928; white-space: nowrap; }
+.sales-date-time { font-size: 12px; color: var(--text-body); }
+
+/* Source: rounded grey pill */
+.sales-source {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border: 1px solid rgba(204, 195, 216, 0.3);
+  border-radius: var(--radius-pill);
+  background: #e4ddeb;
+  font-size: 12px;
+  font-weight: 500;
+  color: #65616c;
+  white-space: nowrap;
+}
+
+.sales-desc { color: var(--text-body); }
+
+/* Payment: a square-cornered tag, purple when it's a company account */
+.sales-pay {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border: 1px solid rgba(204, 195, 216, 0.5);
+  border-radius: 4px;
+  background: #e8dff4;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-body);
+  white-space: nowrap;
+}
+.sales-pay--account {
+  background: #eaddff;
+  border-color: #d2bbff;
+  color: #25005a;
+}
+
+.sales-amount {
+  font-family: "Liberation Mono", ui-monospace, monospace;
+  font-size: 14px;
+  color: #1e1928;
+  white-space: nowrap;
+}
+
+/* Status: pill with a coloured dot */
+.sales-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  border: 1px solid;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.sales-status__dot { width: 6px; height: 6px; border-radius: 50%; }
+.sales-status--paid {
+  background: #d1fae5;
+  border-color: #a7f3d0;
+  color: #065f46;
+}
+.sales-status--paid .sales-status__dot { background: #10b981; }
+.sales-status--unpaid {
+  background: #fef3c7;
+  border-color: #fde68a;
+  color: #92400e;
+}
+.sales-status--unpaid .sales-status__dot { background: #f59e0b; }
+
+.sales-view {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: #4800a0;
+  cursor: pointer;
+}
+.sales-view:hover { text-decoration: underline; }
+
+@media (max-width: 1000px) {
+  .sales-filters { flex-direction: column; align-items: flex-start; }
+  .sales-stats-wrap { justify-content: flex-start; }
+}
+
+/* =========================================================================
+   ACCOUNTING — CASH
+   Reuses .sales-card, .sales-stats, .sales-view and .sales-empty from the
+   Sales page. Only what's unique to the cashbook lives here.
+   ========================================================================= */
+
+/* ---- Filter row: labelled dropdowns + date range ---- */
+.cash-filters {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-4);
+  width: 100%;
+  flex-wrap: wrap;
+}
+.cash-field { display: flex; flex-direction: column; gap: 4px; }
+.cash-field__label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: -0.55px;
+  text-transform: uppercase;
+  color: var(--text-body);
+}
+.cash-filters__divider {
+  width: 16px;
+  height: 1px;
+  background: rgba(204, 195, 216, 0.5);
+  margin-bottom: 18px;
+}
+
+.cash-select { position: relative; display: inline-flex; align-items: center; }
+.cash-select select {
+  appearance: none;
+  min-width: 160px;
+  padding: 9px 33px 9px 17px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--white);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  font: inherit;
+  font-size: 14px;
+  color: #1e1928;
+  cursor: pointer;
+}
+.cash-select select:focus-visible {
+  outline: 2px solid var(--purple-strong);
+  outline-offset: 1px;
+}
+.cash-select__chevron {
+  position: absolute;
+  right: 12px;
+  display: inline-flex;
+  pointer-events: none;
+  color: var(--text-body);
+}
+
+.cash-dateinput { position: relative; display: inline-flex; align-items: center; }
+.cash-dateinput input {
+  width: 160px;
+  padding: 9px 33px 9px 17px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--white);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  font: inherit;
+  font-size: 14px;
+  color: #1e1928;
+  cursor: pointer;
+}
+.cash-dateinput input:focus-visible {
+  outline: 2px solid var(--purple-strong);
+  outline-offset: 1px;
+}
+.cash-dateinput__icon {
+  position: absolute;
+  right: 10px;
+  display: inline-flex;
+  pointer-events: none;
+  color: var(--text-muted);
+}
+
+/* Money direction colours, shared by the strip, the amounts and the modal. */
+.cash-in  { color: #059669; }
+.cash-out { color: #ba1a1a; }
+
+/* ---- Table ---- */
+.cash-table { width: 100%; border-collapse: collapse; }
+.cash-table thead tr {
+  background: #f4eaff;
+  border-bottom: 1px solid rgba(204, 195, 216, 0.5);
+}
+.cash-table th {
+  padding: 8px 16px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: -0.55px;
+  text-transform: uppercase;
+  color: var(--text-body);
+  white-space: nowrap;
+}
+.cash-table td {
+  padding: 16px;
+  border-top: 1px solid rgba(204, 195, 216, 0.3);
+  font-size: 14px;
+  color: #1e1928;
+  vertical-align: middle;
+}
+.cash-table tbody tr:first-child td { border-top: 0; }
+.cash-table .is-right { text-align: right; }
+
+.cash-time {
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: -0.55px;
+  color: var(--text-body);
+}
+.cash-desc { color: #1e1928; }
+
+/* Type pill — tinted by direction */
+.cash-type {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 11px;
+  border-radius: var(--radius-pill);
+  border: 1px solid;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.cash-type--in  { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; }
+.cash-type--out { background: #ffdad6; border-color: #ffdad6; color: #93000a; }
+
+/* Method — plain grey pill */
+.cash-method {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: var(--radius-pill);
+  background: #e8dff4;
+  font-size: 12px;
+  color: var(--text-body);
+  white-space: nowrap;
+}
+
+.cash-amount {
+  font-family: "Liberation Mono", ui-monospace, monospace;
+  font-size: 14px;
+  white-space: nowrap;
+}
+.cash-balance {
+  font-family: "Liberation Mono", ui-monospace, monospace;
+  font-size: 14px;
+  color: var(--text-body);
+  white-space: nowrap;
+}
+
+/* ---- Modal extras ---- */
+.cash-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 13px;
+  background: var(--bg-sidebar);
+  border-radius: var(--radius-input, 12px);
+}
+.cash-link__label { font-size: 14px; color: var(--text-dark); }
+
+.cash-position {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px;
+  background: var(--bg-sidebar);
+  border-radius: var(--radius-md);
+}
+.cash-position__after {
+  font-family: "Liberation Mono", ui-monospace, monospace;
+  font-weight: 700;
+  color: var(--purple-strong);
+}
+
+.cash-void {
+  padding: 0 12px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ba1a1a;
+  cursor: pointer;
+}
+.cash-void:hover { text-decoration: underline; }
+
+@media (max-width: 1000px) {
+  .cash-filters__divider { display: none; }
+}
+
+/* =========================================================================
+   ACCOUNTING — EXPENSES
+   Reuses .sales-empty, .search, .order-summary, .section-divider,
+   .detail-row, .price-input, .select-wrap and the modal families.
+   ========================================================================= */
+
+/* ---- Top row: figure cards + the Expenses Card ---- */
+.exp-toprow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-8);
+  width: 100%;
+  flex-wrap: wrap;
+}
+.exp-figures { display: flex; gap: var(--space-6); flex: 1; min-width: 0; }
+.exp-figure {
+  flex: 1;
+  min-width: 240px;
+  padding: 25px;
+  background: var(--white);
+  border: 1px solid var(--border-grey);
+  border-radius: var(--radius-md);
+}
+.exp-figure__label {
+  font-size: 16px;
+  font-weight: 600;
+  color: #000;
+  margin-bottom: 8px;
+}
+.exp-figure__value {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.72px;
+  color: #191c1d;
+}
+
+/* The Expenses Card — same shape as an account card. */
+.exp-card {
+  width: 299px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 17px 25px;
+  background: var(--white);
+  border: 1px solid var(--border-grey);
+  border-radius: var(--radius-md);
+}
+.exp-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 13px;
+  border-bottom: 1px solid var(--border-grey);
+}
+.exp-card__title { font-size: 14px; font-weight: 700; color: #191c1d; }
+.exp-card__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: #f0fdf4;
+  font-size: 12px;
+  font-weight: 500;
+  color: #047857;
+}
+.exp-card__dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; }
+.exp-card__amount {
+  font-family: "Liberation Mono", ui-monospace, monospace;
+  font-size: 14px;
+  color: #191c1d;
+}
+.exp-card__count { margin-top: 12px; font-size: 14px; color: var(--text-body); }
+.exp-card__link {
+  align-self: flex-start;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--purple-strong);
+  cursor: pointer;
+}
+.exp-card__link:hover { text-decoration: underline; }
+
+/* ---- Table card ---- */
+.exp-table-card {
+  width: 100%;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.04);
+}
+
+.exp-filterbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: 16px;
+  background: var(--bg-page, #fef7ff);
+  border-bottom: 1px solid var(--border);
+}
+.exp-filterbar__left { display: flex; align-items: center; gap: 12px; }
+
+.exp-select { position: relative; display: inline-flex; align-items: center; }
+.exp-select select {
+  appearance: none;
+  padding: 7px 41px 7px 17px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: #f4eaff;
+  font: inherit;
+  font-size: 16px;
+  color: var(--text-body);
+  cursor: pointer;
+}
+.exp-select__chevron {
+  position: absolute;
+  right: 14px;
+  display: inline-flex;
+  pointer-events: none;
+  color: var(--text-body);
+}
+
+.exp-search { position: relative; display: inline-flex; align-items: center; width: 256px; }
+.exp-search input {
+  width: 100%;
+  padding: 8px 13px 9px 37px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-page, #fef7ff);
+  font: inherit;
+  font-size: 14px;
+  color: var(--text-dark);
+}
+.exp-search input::placeholder { color: var(--text-muted); }
+.exp-search__icon {
+  position: absolute;
+  left: 12px;
+  display: inline-flex;
+  pointer-events: none;
+  color: var(--text-muted);
+}
+
+.exp-tablehead { padding: 24px 24px 16px; }
+.exp-tablehead__title {
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  color: #1e1928;
+}
+.exp-tablehead__sub { margin: 0; font-size: 14px; color: var(--text-body); }
+
+.exp-tablewrap { width: 100%; overflow-x: auto; }
+
+/* The expenses table matches Cash and Sales — same header fill, same row
+   rhythm, same dividers — so the three read as one family. */
+.exp-table { width: 100%; border-collapse: collapse; }
+.exp-table thead tr {
+  background: #f4eaff;
+  border-bottom: 1px solid rgba(204, 195, 216, 0.5);
+}
+.exp-table th {
+  padding: 8px 16px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: -0.55px;
+  text-transform: uppercase;
+  color: var(--text-body);
+  white-space: nowrap;
+}
+.exp-table td {
+  padding: 16px;
+  border-top: 1px solid rgba(204, 195, 216, 0.3);
+  font-size: 14px;
+  color: #1e1928;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.exp-table tbody tr:first-child td { border-top: 0; }
+.exp-table .is-right { text-align: right; }
+
+.exp-desc { color: #1e1928; max-width: 260px; overflow: hidden; text-overflow: ellipsis; }
+.exp-amount {
+  font-family: "Liberation Mono", ui-monospace, monospace;
+  font-size: 14px;
+  color: #1e1928;
+  white-space: nowrap;
+}
+
+/* Category pill — colours come from the data file. */
+.exp-cat {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* A voided row: greyed, struck through, and clickable for the reason. */
+.exp-row--voided {
+  background: #e8dff4;
+  opacity: 0.5;
+  cursor: pointer;
+}
+.exp-row--voided td { text-decoration: line-through; }
+.exp-row--voided:hover { opacity: 0.65; }
+.exp-voided-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: #ffdad6;
+  font-size: 12px;
+  font-weight: 500;
+  color: #93000a;
+  text-decoration: none;
+}
+
+.exp-void {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: #4800a0;
+  cursor: pointer;
+}
+.exp-void:hover { text-decoration: underline; }
+
+/* ---- Pagination ---- */
+.exp-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 16px;
+  background: var(--bg-page, #fef7ff);
+  border-top: 1px solid var(--border);
+}
+.exp-pagination__count { margin-right: 8px; font-size: 14px; color: var(--text-body); }
+.exp-page {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1e1928;
+  cursor: pointer;
+}
+.exp-page:hover:not(:disabled) { background: var(--bg-sidebar); }
+.exp-page--active { background: #4800a0; color: var(--white); }
+.exp-page:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* =========================================================================
+   OUTSTANDING EXPENSES POPUP
+   ========================================================================= */
+.outexp { max-width: 720px; }
+.outexp-total { color: #ba1a1a; }
+.outexp-empty { padding: 24px; text-align: center; color: var(--text-muted); font-size: 14px; }
+
+.outexp-list { display: flex; flex-direction: column; }
+.outexp-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: 14px 8px;
+  border-top: 1px solid rgba(204, 195, 216, 0.4);
+}
+.outexp-list > div:first-child .outexp-row { border-top: 0; }
+
+.outexp-row__info { flex: 1; min-width: 0; }
+.outexp-row__top { display: flex; align-items: center; gap: 8px; }
+.outexp-row__name { font-size: 14px; font-weight: 500; color: var(--text-dark); }
+.outexp-row__date { margin-top: 2px; font-size: 12px; color: var(--text-muted); }
+
+.outexp-row__money { text-align: right; min-width: 160px; }
+.outexp-row__owed {
+  font-family: "Liberation Mono", ui-monospace, monospace;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ba1a1a;
+}
+.outexp-row__part { margin-top: 2px; font-size: 11px; color: var(--text-muted); }
+.outexp-bar {
+  margin-top: 4px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--bg-sidebar);
+  overflow: hidden;
+}
+.outexp-bar__fill { height: 100%; background: var(--purple-strong); border-radius: 2px; }
+
+/* The pay button — circular, tinted; solid purple while its strip is open. */
+.outexp-pay {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #eaddff;
+  color: var(--purple-strong);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.outexp-pay:hover { background: #d9c2ff; }
+.outexp-pay--active { background: var(--purple-strong); color: var(--white); }
+
+/* The inline payment strip, inset beneath its row. */
+.outexp-paystrip {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  margin: 0 8px 12px 8px;
+  padding: 14px;
+  background: var(--bg-sidebar);
+  border-radius: var(--radius-md);
+}
+.outexp-paystrip__field { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
+.outexp-paystrip__go { flex-shrink: 0; }
+.outexp-paystrip__cancel {
+  flex-shrink: 0;
+  padding: 0 4px 10px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  color: var(--text-body);
+  cursor: pointer;
+}
+.outexp-paystrip__cancel:hover { text-decoration: underline; }
+
+.void-reason {
+  margin: 4px 0 0;
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--text-body);
+}
+
+@media (max-width: 1100px) {
+  .exp-toprow { flex-direction: column; }
+  .exp-card { width: 100%; }
+}
+/* =========================================================================
+   ACCOUNTING OVERVIEW
+   A wide (22-column) table that scrolls horizontally inside its card, with the
+   Month column pinned. Colours taken from the Figma spec; spacing and tokens
+   from the existing system.
+   ========================================================================= */
+
+/* ---- Action bar ---- */
+.acct-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+  padding-bottom: var(--space-2);
+}
+.acct-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--white);
+  font: inherit;
+  font-size: 14px;
+  color: var(--text-body);
+  cursor: pointer;
+}
+.acct-action:hover { border-color: var(--purple-strong); color: var(--purple-strong); }
+.acct-action--primary {
+  background: var(--purple-strong);
+  border-color: var(--purple-strong);
+  color: var(--white);
+}
+.acct-action--primary:hover { opacity: 0.92; color: var(--white); }
+.acct-action--link {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--purple-strong);
+  font-weight: 600;
+}
+.acct-actions__divider {
+  width: 1px;
+  height: 24px;
+  background: var(--border);
+  margin: 0 var(--space-2);
+}
+
+/* ---- Table shell ---- */
+.acct-table-wrap {
+  width: 100%;
+  overflow: auto;                   /* wider AND taller than the page */
+  /* A sticky header needs a scrolling box to stick inside. Capping the height
+     here is what makes the column names stay put as you scroll down. */
+  max-height: calc(100vh - 260px);
+  background: var(--bg-page, #fef7ff);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.04);
+}
+.acct-table {
+  border-collapse: collapse;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+/* ---- Headers ----
+   Both header rows stay put while the body scrolls. The group row sits at the
+   top; the column row sits directly beneath it, so `top` is the group row's
+   height. z-index has three tiers: ordinary cells, the sticky month column,
+   then the headers — and the top-left corner cells need to beat both. */
+.acct-grouprow th {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+}
+.acct-colrow th {
+  position: sticky;
+  /* Must equal the group row's height exactly, or the two rows overlap or gap.
+     That row's height is pinned below so this number stays true. */
+  top: 43px;
+  z-index: 4;
+}
+/* Pinned so the offset above can't drift if padding or font-size changes. */
+.acct-grouprow th { height: 43px; box-sizing: border-box; }
+/* The two corner cells are sticky in BOTH directions, so they must sit above
+   the headers and the month column alike. */
+.acct-grouprow .acct-sticky,
+.acct-colrow .acct-sticky {
+  z-index: 6;
+}
+
+.acct-th {
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: -0.55px;
+  text-transform: uppercase;
+  color: var(--text-body);
+  text-align: right;
+  white-space: nowrap;
+}
+.acct-th--bold { font-weight: 700; color: #1e1928; }
+.acct-th--left { text-align: left; }
+.acct-th__inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: flex-end;
+}
+
+/* Group header row — bold, centred, tinted per group */
+.acct-grouprow .acct-th {
+  font-weight: 700;
+  letter-spacing: 0.55px;
+  text-align: center;
+  border-right: 1px solid var(--border);
+}
+.acct-group--plain  { background: #eee4fa; }
+.acct-group--sales  { background: #f7f9ff; }
+.acct-group--in     { background: #f7fffa; }
+.acct-group--out    { background: #fff7f7; }
+.acct-group--profit { background: #eee4fa; color: var(--purple-strong); }
+
+/* Column header row — faint group tints carried down */
+/* Sticky headers must be OPAQUE — a translucent one lets the rows scroll
+   visibly through it. These are the same tints, flattened onto #fef7ff. */
+.acct-colrow .acct-th { background: #fef7ff; }
+.acct-colrow .acct-col--sales      { background: #fdf8ff; }
+.acct-colrow .acct-col--salestotal { background: #fcf9ff; border-left: 1px solid var(--border-faint); }
+.acct-colrow .acct-col--in         { background: #fdfaff; }
+.acct-colrow .acct-col--intotal    { background: #fbfcfd; border-left: 1px solid var(--border-faint); border-right: 1px solid var(--border-faint); }
+.acct-colrow .acct-col--out        { background: #fef7fd; }
+.acct-colrow .acct-col--outtotal   { background: #fef6fb; border-left: 1px solid var(--border-faint); border-right: 1px solid var(--border-faint); }
+.acct-col--groupend { border-right: 1px solid var(--border); }
+
+/* The little info icon on a header */
+.acct-info {
+  display: inline-flex;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.acct-info:hover { color: var(--purple-strong); }
+.acct-info__body {
+  margin: 0;
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--text-body);
+}
+
+/* ---- Body cells ---- */
+.acct-td {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  font-family: "Liberation Mono", ui-monospace, monospace;
+  font-size: 14px;
+  color: #1e1928;
+  text-align: right;
+  white-space: nowrap;
+}
+/* Totals sit on white so they read as the anchor of each group. */
+.acct-td--total {
+  background: var(--white);
+  font-weight: 700;
+  border-left: 1px solid var(--border-faint);
+  border-right: 1px solid var(--border-faint);
+}
+.acct-td--profit { color: var(--purple-strong); font-weight: 700; }
+.acct-td--pos { color: #166534; font-weight: 700; }
+.acct-td--neg { color: #ba1a1a; font-weight: 700; }
+.acct-td--balance { background: rgba(232, 223, 244, 0.3); font-weight: 700; }
+.acct-dash { color: var(--text-body); }
+
+/* Month column — pinned so it stays put while scrolling sideways. */
+.acct-sticky {
+  position: sticky;
+  left: 0;
+  z-index: 3;
+  text-align: left;
+  border-right: 1px solid var(--border);
+}
+.acct-td--month {
+  background: #fef7ff;
+  font-family: Inter, system-ui, sans-serif;
+  font-weight: 500;
+}
+/* A drillable figure: dashed underline, opens a detail view. */
+.acct-drill {
+  padding: 0;
+  border: 0;
+  border-bottom: 1px dashed var(--text-muted);
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.acct-drill:hover { color: var(--purple-strong); border-bottom-color: var(--purple-strong); }
+.acct-drill--muted { color: var(--text-body); }
+
+/* Totals footer — stays pinned to the bottom, since it's the row you compare
+   everything against. */
+.acct-ytd td {
+  position: sticky;
+  bottom: 0;
+  z-index: 3;
+}
+.acct-ytd .acct-sticky { z-index: 5; }
+
+.acct-ytd .acct-td {
+  background: var(--white);
+  border-top: 2px solid var(--text-muted);
+  border-bottom: 0;
+  padding: 16px;
+  font-weight: 700;
+}
+.acct-td--ytdlabel {
+  font-family: Inter, system-ui, sans-serif;
+  text-align: left;
+}
+
+/* ---- Prose summary ---- */
+.acct-summary {
+  width: 100%;
+  max-width: 720px;
+  padding: 33px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+.acct-summary__title {
+  margin: 0 0 16px;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+.acct-summary__list {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.acct-summary__list li {
+  font-size: 15px;
+  line-height: 26px;
+  color: var(--text-body);
+}
+.acct-summary__list strong {
+  font-family: "Liberation Mono", ui-monospace, monospace;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+/* A drillable figure gets a pointer + a hint that it opens something. */
+.acct-drill { cursor: pointer; }
+.acct-drill[title]:hover { color: var(--purple-strong); }
+
+/* =========================================================================
+   ACCOUNTING ENTRY POPUPS
+   ========================================================================= */
+
+/* Add Expense is wide: form on the left, recent entries on the right. */
+.addexp { max-width: 860px; }
+.addexp__body {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: var(--space-8);
+  align-items: start;
+}
+.addexp__form { display: flex; flex-direction: column; gap: var(--space-4); }
+
+.addexp__hint {
+  margin: 6px 0 0;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--text-muted);
+}
+
+/* Choosing the Expenses Card means "not paid yet" — worth stating plainly. */
+.addexp__note {
+  margin: 0;
+  padding: 12px 14px;
+  background: #fef3c7;
+  border: 1px solid #fde68a;
+  border-radius: var(--radius-input, 12px);
+  font-size: 13px;
+  line-height: 20px;
+  color: #92400e;
+}
+.addexp__note strong { font-weight: 700; }
+
+.addexp__recent {
+  padding: var(--space-4);
+  background: var(--bg-sidebar);
+  border-radius: var(--radius-md);
+}
+.addexp__recentlist {
+  display: flex;
+  flex-direction: column;
+  margin-top: var(--space-2);
+}
+.addexp__recentrow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 10px 0;
+  border-top: 1px solid rgba(204, 195, 216, 0.4);
+}
+.addexp__recentrow:first-child { border-top: 0; }
+.addexp__recentname { font-size: 13px; font-weight: 500; color: var(--text-dark); }
+.addexp__recentmeta { margin-top: 2px; font-size: 11px; color: var(--text-muted); }
+.addexp__recentamt {
+  font-family: "Liberation Mono", ui-monospace, monospace;
+  font-size: 13px;
+  color: var(--text-body);
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .addexp__body { grid-template-columns: 1fr; }
+}
+
+/* =========================================================================
+   OVERVIEW — the day view
+   Clicking a month name REPLACES the year's rows with that month's days, so
+   the two never share the screen. A bar above the table says where you are and
+   offers the way back.
+   ========================================================================= */
+
+.acct-viewbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+}
+.acct-back {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--white);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--purple-strong);
+  cursor: pointer;
+}
+.acct-back:hover { background: var(--bg-sidebar); }
+.acct-viewbar__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+/* The month name is the way in, so it should look like it. */
+.acct-monthlink {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-family: Inter, system-ui, sans-serif;
+  font-weight: 500;
+  color: var(--purple-strong);
+  cursor: pointer;
+}
+.acct-monthlink:hover { text-decoration: underline; }
+
+/* Day rows are plain rows — the whole table is the month now, so they need no
+   nesting treatment. Just a quieter date column. */
+.acct-td--day {
+  background: #fef7ff;
+  font-family: Inter, system-ui, sans-serif;
+  font-weight: 500;
+  color: var(--text-body);
+}
+
+/* A group TOTAL that's drillable keeps its bold weight. */
+.acct-drill--total { font-weight: 700; }
+
+/* =========================================================================
+   ROOM DETAILS POPUP
+   Colours and spacing taken from the Figma frame. It uses its own classes
+   rather than the shared .modal-* family because its header, chips and
+   hairlines differ from the other popups.
+   ========================================================================= */
+
+.rd-card {
+  width: 480px;
+  max-width: 100%;
+  padding: 1px;
+  background: var(--white);
+  border: 1px solid rgba(203, 195, 215, 0.6);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* A hairline between the header, body and footer. */
+.rd-hairline { height: 1px; background: rgba(203, 195, 215, 0.6); }
+
+/* ---- Header ---- */
+.rd-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 24px 24px 16px;
+}
+.rd-header__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.rd-header__title { display: flex; align-items: center; gap: 10px; }
+.rd-number {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 28px;
+  letter-spacing: -0.5px;
+  color: #151c27;
+}
+.rd-subtitle {
+  margin: 0;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--text-muted);
+}
+
+/* Status pill, tinted by the room's state. */
+.rd-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 11px;
+  border: 1px solid;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+  white-space: nowrap;
+}
+.rd-status__dot { width: 6px; height: 6px; border-radius: 50%; }
+.rd-status--available { background: #ecfdf5; border-color: #a7f3d0; color: #059669; }
+.rd-status--available .rd-status__dot { background: #059669; }
+.rd-status--booked { background: #eff5fe; border-color: #bfdbfe; color: #1d4ed8; }
+.rd-status--booked .rd-status__dot { background: #3b82f6; }
+.rd-status--other { background: #f3f4f6; border-color: #e5e7eb; color: #4b5563; }
+.rd-status--other .rd-status__dot { background: #9ca3af; }
+
+.rd-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--text-body);
+  cursor: pointer;
+}
+.rd-close:hover { background: var(--bg-sidebar); }
+
+/* ---- Body ---- */
+.rd-body {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 20px 24px 24px;
+}
+.rd-muted { margin: 0; font-size: 14px; color: var(--text-muted); }
+.rd-error { margin: 0; font-size: 14px; color: #c0392b; }
+
+.rd-section { display: flex; flex-direction: column; gap: 8px; }
+.rd-section__title {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 16px;
+  letter-spacing: -0.55px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.rd-section__rule { height: 1px; background: rgba(203, 195, 215, 0.5); }
+
+.rd-rows { display: flex; flex-direction: column; gap: 10px; }
+.rd-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.rd-row--wrap { align-items: flex-start; }
+.rd-row__label {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--text-body);
+  white-space: nowrap;
+}
+.rd-row__value {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  color: #151c27;
+  text-align: right;
+}
+/* Directions can be a sentence, so it's the one value allowed to wrap. */
+.rd-row__value--wrap { max-width: 260px; white-space: normal; }
+
+/* ---- Amenity chips ---- */
+.rd-amenities {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding-top: 4px;
+}
+.rd-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 11px;
+  background: #f5f0ff;
+  border: 1px solid #e9d5ff;
+  border-radius: 32px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 18px;
+  color: #3b1262;
+}
+/* What the room does NOT have — struck through, so its absence is explicit
+   rather than left to inference. */
+.rd-chip--missing {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  color: #94a3b8;
+  font-weight: 400;
+  text-decoration: line-through;
+}
+
+/* ---- Footer ---- */
+.rd-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 16px 24px;
+  background: var(--white);
+}
+.rd-btn {
+  padding: 9px 21px;
+  border: 1px solid var(--border-grey);
+  border-radius: 48px;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--text-body);
+  cursor: pointer;
+}
+.rd-btn:hover { background: var(--bg-sidebar); }
+
+/* ---- The ⓘ button on a room card ---- */
+.room-info-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(99, 14, 212, 0.1);
+  color: var(--purple-strong);
+  cursor: pointer;
+}
+.room-info-btn:hover { background: rgba(99, 14, 212, 0.2); }
+
+@media (max-width: 520px) {
+  .rd-amenities { grid-template-columns: 1fr; }
+}
+
+/* The room number and its ⓘ share a line. */
+.room-card__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* =========================================================================
+   HOUSEKEEPING — clean / dirty
+   Colours from the Figma frame. The card dot is deliberately quiet: the card's
+   whole tint already carries the room status, so this is secondary.
+   ========================================================================= */
+
+/* The dot on a room card — a bare dot in a translucent pill, no text. */
+.room-card { position: relative; }
+.room-hk {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(2px);
+}
+.room-hk__dot { width: 8px; height: 8px; border-radius: 50%; }
+.room-hk--clean .room-hk__dot { background: #059669; }
+.room-hk--dirty .room-hk__dot { background: #92400e; }
+
+/* The legend bar above the grid. Since the card dot has no text, something
+   has to say what the colours mean. */
+.hk-ribbon {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 20px;
+  background: var(--white);
+  border-radius: var(--radius-md);
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.05));
+}
+.hk-ribbon__spacer { height: 16px; flex: 1; }
+.hk-ribbon__key { display: flex; align-items: center; gap: 16px; }
+.hk-ribbon__label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  line-height: 16px;
+  text-transform: uppercase;
+  color: var(--text-body);
+  white-space: nowrap;
+}
+.hk-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-sidebar);
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--text-body);
+  white-space: nowrap;
+}
+.hk-key__dot { width: 8px; height: 8px; border-radius: 50%; }
+.hk-key__dot--clean { background: #059669; }
+.hk-key__dot--dirty { background: #92400e; }
+
+@media (max-width: 700px) {
+  .hk-ribbon { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .hk-ribbon__spacer { display: none; }
+}
+
+/* =========================================================================
+   ROOM ISSUES — report form, reports list, and the badge
+   Colours from the Figma frames.
+   ========================================================================= */
+
+/* ---- The badge in the actions row ---- */
+.room-actions-row__divider {
+  width: 1px;
+  height: 16px;
+  background: var(--border);
+}
+.issue-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 7px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--bg-sidebar);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--purple-strong);
+  cursor: pointer;
+}
+.issue-badge:hover {
+  background: var(--purple-strong);
+  border-color: var(--purple-strong);
+  color: var(--white);
+}
+
+/* ---- Shared modal shell (both popups) ---- */
+.ri-card { width: 520px; max-width: 100%; padding: 0; overflow: hidden; }
+.mr-card { width: 620px; max-width: 100%; padding: 0; overflow: hidden; display: flex; flex-direction: column; max-height: 86vh; }
+
+.ri-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 24px 28px 16px;
+}
+.ri-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 28px;
+  color: var(--text-dark);
+}
+.mr-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 28px;
+  color: var(--text-dark);
+}
+.ri-subtitle {
+  margin: 1px 0 0;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--text-muted);
+}
+.ri-rule { height: 1px; background: rgba(203, 195, 215, 0.6); margin: 0 28px; }
+
+/* ---- Form ---- */
+.ri-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px 28px 8px;
+}
+.ri-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.ri-field { display: flex; flex-direction: column; gap: 6px; }
+.ri-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: -0.55px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.ri-input {
+  width: 100%;
+  padding: 11px 17px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--white);
+  font: inherit;
+  font-size: 15px;
+  color: var(--text-dark);
+}
+.ri-input:focus-visible { outline: 2px solid var(--purple-strong); outline-offset: 1px; }
+.ri-textarea { resize: vertical; min-height: 88px; line-height: 22px; }
+
+/* Priority pills — the colour is visible before you pick, which a dropdown
+   would hide until opened. */
+.ri-priorities { display: flex; gap: 10px; }
+.ri-pri {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 17px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--white);
+  font: inherit;
+  font-size: 14px;
+  color: var(--text-body);
+  cursor: pointer;
+}
+.ri-pri__dot { width: 8px; height: 8px; border-radius: 50%; background: #cbd5e1; }
+.ri-pri__dot--low { background: #94a3b8; }
+.ri-pri__dot--medium { background: #f59e0b; }
+.ri-pri__dot--high { background: #dc2626; }
+.ri-pri--on.ri-pri--low { background: #f4f3f6; border-color: #cbd5e1; color: #475569; }
+.ri-pri--on.ri-pri--medium { background: #fffbeb; border-color: #fde68a; color: #b45309; }
+.ri-pri--on.ri-pri--high { background: #fef2f2; border-color: #fecaca; color: #dc2626; }
+.ri-pri--on { font-weight: 600; }
+
+.ri-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 28px 24px;
+}
+.ri-cancel {
+  padding: 10px 20px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-body);
+  cursor: pointer;
+}
+.ri-cancel:hover { text-decoration: underline; }
+
+/* ---- Reports list ---- */
+.mr-summary {
+  display: flex;
+  align-items: center;
+  padding: 14px 28px;
+}
+.mr-stat { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+.mr-stat__label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: -0.55px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.mr-stat__value { font-size: 20px; font-weight: 700; line-height: 28px; }
+.mr-stat__value--open { color: var(--purple-strong); }
+.mr-stat__value--progress { color: #b45309; }
+.mr-stat__value--resolved { color: #059669; }
+.mr-summary__divider { width: 1px; height: 28px; background: var(--border); margin: 0 24px; }
+
+.mr-section { padding: 18px 28px 8px; }
+.mr-section__label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: -0.55px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.mr-section__rule { height: 1px; background: rgba(203, 195, 215, 0.5); margin: 0 28px; }
+
+.mr-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 4px 20px;
+}
+.mr-empty { padding: 28px; text-align: center; }
+
+.mr-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 8px;
+  border-radius: 32px;
+}
+.mr-row:hover { background: rgba(249, 241, 255, 0.6); }
+.mr-row__info { min-width: 0; padding-right: 8px; }
+.mr-row__top { display: flex; align-items: center; gap: 8px; }
+.mr-room { font-size: 15px; font-weight: 600; line-height: 20px; color: #151c27; }
+.mr-time { font-size: 12px; line-height: 16px; color: #9c94a8; padding-left: 4px; }
+.mr-issue {
+  margin: 2px 0 0;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--text-muted);
+}
+
+/* Priority tag on a row */
+.mr-pri {
+  display: inline-flex;
+  padding: 3px 9px;
+  border: 1px solid;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 16px;
+  white-space: nowrap;
+}
+.mr-pri--high { background: #fef2f2; border-color: #fecaca; color: #dc2626; }
+.mr-pri--medium { background: #fffbeb; border-color: #fde68a; color: #b45309; }
+.mr-pri--low { background: #f4f3f6; border-color: #e5e3ea; color: #64748b; }
+
+/* Where the report has got to */
+.mr-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  padding: 5px 11px;
+  border: 1px solid;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  white-space: nowrap;
+}
+.mr-status__dot { width: 6px; height: 6px; border-radius: 50%; }
+.mr-status--received { background: #f4f3f6; border-color: #e5e3ea; color: var(--text-body); }
+.mr-status--received .mr-status__dot { background: #7b7487; }
+.mr-status--in-progress { background: #fffbeb; border-color: #fde68a; color: #b45309; }
+.mr-status--in-progress .mr-status__dot { background: #f59e0b; }
+.mr-status--resolved { background: #ecfdf5; border-color: #a7f3d0; color: #059669; }
+.mr-status--resolved .mr-status__dot { background: #059669; }
+
+.mr-footer { padding: 16px 28px; border-top: 1px solid rgba(203, 195, 215, 0.6); }
+
+@media (max-width: 560px) {
+  .ri-row { grid-template-columns: 1fr; }
+  .mr-summary { flex-wrap: wrap; gap: 12px; }
+}
+
+/* =========================================================================
+   THERMAL RECEIPT — 80mm
+   Not a page: this is a paper strip. Pure black on white, no fills, no greys,
+   no rounded corners — a thermal printer has one colour, and a grey fill comes
+   out as a smudge or nothing at all. Separation is done with rules.
+   ========================================================================= */
+
+.rcpt-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 16px;
+  overflow-y: auto;
+  background: #eceef2;
+}
+.rcpt-stage { display: flex; flex-direction: column; align-items: center; }
+
+/* Screen-only controls. */
+.rcpt-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 24px;
+}
+.rcpt-bar__note {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 13px;
+  background: #fff;
+  border: 1px solid #d4d4d4;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #404040;
+  white-space: nowrap;
+}
+.rcpt-bar__dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; }
+.rcpt-bar__print {
+  padding: 7px 14px;
+  border: 0;
+  border-radius: 4px;
+  background: #171717;
+  font: inherit;
+  font-size: 12px;
+  color: #fff;
+  cursor: pointer;
+}
+.rcpt-bar__close {
+  padding: 7px 14px;
+  border: 1px solid #d4d4d4;
+  border-radius: 4px;
+  background: #fff;
+  font: inherit;
+  font-size: 12px;
+  color: #404040;
+  cursor: pointer;
+}
+
+/* ---- The paper ---- */
+.rcpt {
+  width: 302px;               /* 80mm */
+  padding: 24px 16px 12px;
+  background: #fff;
+  color: #000;
+  /* Monospace keeps the two columns aligned, which is the whole reason
+     receipts look like this. Using the stack already in the app rather than
+     pulling in a font — it has to work on an offline install. */
+  font-family: "Liberation Mono", ui-monospace, "Courier New", monospace;
+  font-size: 11px;
+  line-height: 16.5px;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.12), 0 2px 6px -1px rgba(0, 0, 0, 0.08);
+}
+.rcpt-b { font-weight: 700; }
+.rcpt-up { text-transform: uppercase; }
+.rcpt-center { text-align: center; }
+
+.rcpt-head { text-align: center; }
+.rcpt-hotel {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 20.63px;
+  letter-spacing: -0.375px;
+  text-transform: uppercase;
+}
+.rcpt-hotel2 {
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 18px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+.rcpt-small { font-size: 11px; line-height: 13.75px; }
+
+/* Rules do all the separating — no boxes, no fills. */
+.rcpt-rule { border-top: 1px solid #000; margin: 8px 0; }
+.rcpt-rule--dashed { border-top-style: dashed; }
+
+.rcpt-rows { display: flex; flex-direction: column; }
+.rcpt-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+.rcpt-cols { display: flex; align-items: center; justify-content: space-between; }
+.rcpt-cols__right { display: flex; gap: 16px; }
+.rcpt-qty { width: 32px; text-align: right; letter-spacing: 0.55px; }
+.rcpt-amt { width: 64px; text-align: right; letter-spacing: 0.55px; }
+
+.rcpt-items { display: flex; flex-direction: column; gap: 10px; padding: 4px 0; }
+.rcpt-item__name {
+  font-weight: 700;
+  letter-spacing: -0.275px;
+  text-transform: uppercase;
+  word-break: break-word;
+}
+.rcpt-item__line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding-left: 8px;         /* indented under its name */
+  white-space: nowrap;
+}
+
+.rcpt-total {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 10px 0 4px;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 18.75px;
+  letter-spacing: -0.375px;
+  white-space: nowrap;
+}
+
+.rcpt-foot { padding: 4px 0 16px; text-align: center; }
+.rcpt-ref {
+  font-size: 9px;
+  line-height: 13.5px;
+  letter-spacing: 0.9px;
+  text-transform: uppercase;
+}
+.rcpt-thanks {
+  padding-top: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 13.75px;
+  text-transform: uppercase;
+}
+.rcpt-tiny { padding-top: 4px; font-size: 10px; line-height: 12.5px; }
+.rcpt-powered {
+  padding-top: 12px;
+  font-size: 9px;
+  font-weight: 500;
+  line-height: 13.5px;
+  letter-spacing: 0.45px;
+  text-transform: uppercase;
+}
+
+/* =========================================================================
+   PRINTING THE RECEIPT
+   Every rule is scoped to `body.printing-receipt`, which BarReceipt adds only
+   while a receipt is on screen. Without that scope these would apply to EVERY
+   print in the app and blank the activity sheets.
+   ========================================================================= */
+@media print {
+  /* `visibility` rather than `display`: a child can undo visibility:hidden
+     inherited from a parent, but nothing can undo display:none — and the
+     receipt sits deep inside #root. */
+  /* Same height release as the sheets below — a long receipt would otherwise
+     be cut off at one screen. */
+  body.printing-receipt,
+  body.printing-receipt html,
+  body.printing-receipt #root {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
+  body.printing-receipt * { visibility: hidden !important; }
+  body.printing-receipt .rcpt-overlay,
+  body.printing-receipt .rcpt-overlay * { visibility: visible !important; }
+
+  /* The on-screen controls never print. */
+  body.printing-receipt .rcpt-bar,
+  body.printing-receipt .rcpt-bar * { visibility: hidden !important; }
+
+  /* Lift the strip to the top-left — everything else is invisible but still
+     takes up space. */
+  body.printing-receipt .rcpt-overlay {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    display: block !important;
+    padding: 0 !important;
+    background: #fff !important;
+    overflow: visible !important;
+  }
+
+  body.printing-receipt .rcpt {
+    width: 80mm !important;
+    padding: 0 3mm !important;
+    box-shadow: none !important;
+  }
+
+  /* A NAMED page, so it applies only to the receipt. A bare @page can't be
+     scoped to a class, and the till roll and the A4 sheets need different
+     paper — one would always have lost. */
+  body.printing-receipt .rcpt-overlay { page: rcptroll; }
+}
+
+@page rcptroll { size: 80mm auto; margin: 0; }
+
+/* =========================================================================
+   STOCK REQUESTS — the bar's request form and its history
+   Colours from the Figma frames.
+   ========================================================================= */
+
+.sr-card {
+  width: 560px;
+  max-width: 100%;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--white);
+  border: 1px solid rgba(240, 234, 247, 0.8);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(21, 28, 39, 0.22);
+}
+.sr-card--wide { width: 620px; }
+
+.sr-hairline { height: 1px; background: #f0eaf7; flex-shrink: 0; }
+
+.sr-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 24px 28px 20px;
+  flex-shrink: 0;
+}
+.sr-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 25px;
+  color: #151c27;
+}
+.sr-subtitle {
+  margin: 3px 0 0;
+  font-size: 13px;
+  line-height: 19.5px;
+  color: var(--text-muted);
+}
+.sr-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--text-body);
+  cursor: pointer;
+}
+.sr-close:hover { background: var(--bg-sidebar); }
+
+/* ---- Form ---- */
+.sr-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px 28px;
+  overflow-y: auto;
+}
+.sr-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+.sr-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.sr-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: -0.55px;
+  line-height: 16.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.sr-input, .sr-select select {
+  width: 100%;
+  padding: 10px 15px 11px;
+  border: 1px solid #ccc3d8;
+  border-radius: 12px;
+  background: var(--white);
+  font: inherit;
+  font-size: 15px;
+  line-height: 22.5px;
+  color: #151c27;
+}
+.sr-input:focus-visible, .sr-select select:focus-visible {
+  outline: 2px solid var(--purple-strong);
+  outline-offset: 1px;
+}
+/* The unit isn't editable — it belongs to the item. */
+.sr-input--readonly {
+  background: #f6f3f8;
+  border-color: #e2dce8;
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+.sr-select { position: relative; }
+.sr-select select { appearance: none; padding-right: 41px; cursor: pointer; }
+.sr-select__chev {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  display: inline-flex;
+  pointer-events: none;
+  color: var(--text-body);
+}
+
+/* How much the store actually has. */
+.sr-avail {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 2px;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--text-muted);
+}
+.sr-avail__dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: rgba(99, 14, 212, 0.7);
+}
+
+.sr-addrow { display: flex; justify-content: flex-end; }
+.sr-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 19.5px;
+  color: var(--purple-strong);
+  cursor: pointer;
+}
+.sr-add:hover { background: var(--bg-sidebar); }
+
+/* ---- The gathered lines ---- */
+.sr-list { display: flex; flex-direction: column; gap: 8px; padding-top: 8px; }
+.sr-list__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 9px;
+  border-bottom: 1px solid #f0eaf7;
+}
+.sr-count {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.55px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.sr-empty { margin: 0; font-size: 13px; color: var(--text-muted); }
+.sr-empty--pad { padding: 28px; text-align: center; }
+.sr-error { margin: 0; font-size: 14px; color: #c0392b; }
+
+.sr-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 15px;
+  background: #fcf9ff;
+  border: 1px solid #eee5f5;
+  border-radius: 12px;
+}
+.sr-line__left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.sr-line__idx {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px; height: 32px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  background: #f0e3fc;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--purple-strong);
+}
+.sr-line__name { font-size: 14px; font-weight: 500; line-height: 19.25px; color: #151c27; }
+.sr-line__cat { margin-top: 2px; font-size: 12px; line-height: 18px; color: var(--text-muted); }
+.sr-line__right { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
+.sr-line__qty {
+  padding: 5px 11px;
+  border: 1px solid #e5dceb;
+  border-radius: 8px;
+  background: var(--white);
+  font-size: 13px;
+  font-weight: 600;
+  color: #151c27;
+  white-space: nowrap;
+}
+.sr-line__x {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px; height: 28px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.sr-line__x:hover { background: #f0e3fc; color: var(--purple-strong); }
+
+/* ---- Footer ---- */
+.sr-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 17px 28px;
+  background: rgba(250, 247, 252, 0.6);
+  flex-shrink: 0;
+}
+.sr-cancel {
+  padding: 10px 20px;
+  border: 0;
+  border-radius: 12px;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: #151c27;
+  cursor: pointer;
+}
+.sr-cancel:hover { background: var(--bg-sidebar); }
+.sr-send {
+  padding: 10px 24px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--purple-strong);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--white);
+  cursor: pointer;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.05));
+}
+.sr-send:hover:not(:disabled) { opacity: 0.92; }
+.sr-send:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ---- The history list ---- */
+.sr-scroll { flex: 1; min-height: 0; overflow-y: auto; }
+
+.sr-summary {
+  display: flex;
+  align-items: center;
+  margin: 24px 28px 0;
+  padding: 17px 21px;
+  background: var(--bg-sidebar);
+  border-radius: 12px;
+}
+.sr-metric { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.sr-metric__label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: -0.55px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.sr-metric__value { font-size: 20px; font-weight: 700; line-height: 28px; }
+.sr-metric__value--pending { color: var(--purple-strong); }
+.sr-metric__value--delivered { color: #b45309; }
+.sr-metric__value--received { color: #059669; }
+.sr-summary__divider { width: 1px; height: 36px; background: var(--border); }
+
+.sr-sectionhead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 28px 8px;
+}
+.sr-sectionhead__rule { flex: 1; height: 1px; background: #f0eaf7; }
+
+.sr-requests { padding: 0 28px 16px; }
+.sr-req {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 17px 8px;
+  border-bottom: 1px solid #f0eaf7;
+}
+.sr-req:last-child { border-bottom: 0; }
+.sr-req__info { min-width: 0; }
+.sr-req__top { display: flex; align-items: baseline; gap: 8px; }
+.sr-req__name {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 23px;
+  color: #151c27;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 300px;
+}
+.sr-req__time { font-size: 12px; line-height: 18px; color: var(--text-muted); white-space: nowrap; }
+.sr-req__qty { margin-top: 1px; font-size: 13px; line-height: 20px; color: var(--text-body); }
+
+.sr-req__right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.sr-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  border: 1px solid;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+  white-space: nowrap;
+}
+.sr-status__dot { width: 6px; height: 6px; border-radius: 50%; }
+.sr-status--pending { background: #f4f3f6; border-color: #e5e3ea; color: var(--text-body); }
+.sr-status--pending .sr-status__dot { background: #7b7487; }
+.sr-status--delivered { background: #fffbeb; border-color: #fde68a; color: #b45309; }
+.sr-status--delivered .sr-status__dot { background: #f59e0b; }
+.sr-status--received { background: #ecfdf5; border-color: #a7f3d0; color: #059669; }
+.sr-status--received .sr-status__dot { background: #059669; }
+
+/* Only appears on a delivered request — the one state with something to do. */
+.sr-receive {
+  padding: 4px 12px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--purple-strong);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--white);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.sr-receive:hover:not(:disabled) { opacity: 0.92; }
+.sr-receive:disabled { opacity: 0.6; cursor: not-allowed; }
+
+@media (max-width: 600px) {
+  .sr-row { grid-template-columns: 1fr; }
+  .sr-req { flex-direction: column; align-items: flex-start; }
+  .sr-req__right { align-items: flex-start; flex-direction: row; }
+}
+
+/* The request controls sit at the right end of the bar's top bar. */
+.bar-topbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+/* ---- The store's view of a request ---- */
+.sr-req__bar {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 23px;
+  color: #151c27;
+  white-space: nowrap;
+}
+.sr-req__items {
+  margin-top: 1px;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--text-body);
+}
+.sr-req__note {
+  margin-top: 3px;
+  font-size: 12px;
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+/* The store's header controls, mirroring the bar's. */
+.stock-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+/* =========================================================================
+   TODAY'S ACTIVITY
+   Screen styles first, then the print rules at the bottom — printing strips
+   the chrome and colour and reveals the sign-off block.
+   ========================================================================= */
+
+.act-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-6);
+  width: 100%;
+  padding-top: var(--space-6);
+}
+.act-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 30px;
+  color: var(--text-dark);
+}
+.act-date {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+.act-controls { display: flex; align-items: center; gap: 12px; }
+.act-datepick {
+  padding: 9px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--white);
+  font: inherit;
+  font-size: 14px;
+  color: var(--text-dark);
+  cursor: pointer;
+}
+.act-print, .act-back {
+  padding: 10px 22px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--white);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--purple-strong);
+  cursor: pointer;
+}
+.act-print:hover { background: var(--bg-sidebar); }
+.act-back { color: var(--text-body); font-weight: 500; }
+.act-back:hover { background: var(--bg-sidebar); }
+
+/* ---- The five figures ---- */
+.act-stats {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  padding: 17px 25px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+.act-stat { display: flex; flex-direction: column; gap: 4px; flex: 1; padding: 0 8px; }
+.act-stat__label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: -0.55px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.act-stat__value { font-size: 24px; font-weight: 700; line-height: 26px; color: var(--text-dark); }
+.act-stat__note { font-size: 12px; color: var(--text-muted); }
+.act-stats__divider { width: 1px; background: var(--border); margin: 0 13px; }
+
+/* ---- The log ---- */
+.act-card {
+  width: 100%;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  overflow: hidden;
+}
+.act-table { width: 100%; border-collapse: collapse; }
+.act-table thead tr {
+  background: #f4eaff;
+  border-bottom: 1px solid var(--border);
+}
+.act-table th {
+  padding: 14px 24px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: -0.55px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.act-table td {
+  padding: 19px 24px;
+  border-top: 1px solid rgba(204, 195, 216, 0.4);
+  font-size: 14px;
+  color: var(--text-dark);
+  vertical-align: middle;
+}
+.act-table tbody tr:first-child td { border-top: 0; }
+.act-table .is-right { text-align: right; }
+
+.act-time { white-space: nowrap; color: var(--text-body); }
+.act-room { font-weight: 500; white-space: nowrap; }
+.act-details { color: var(--text-body); }
+.act-amount {
+  font-family: "Liberation Mono", ui-monospace, monospace;
+  white-space: nowrap;
+}
+.act-staff { color: var(--text-body); white-space: nowrap; }
+.act-empty { padding: 28px; text-align: center; color: var(--text-muted); }
+.act-error { color: #c0392b; }
+
+/* Event tag, colour-coded by kind. */
+.act-ev {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 13px;
+  border: 1px solid;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.act-ev__dot { width: 6px; height: 6px; border-radius: 50%; }
+.act-ev--check-in { background: #ecfdf5; border-color: #a7f3d0; color: #059669; }
+.act-ev--check-in .act-ev__dot { background: #059669; }
+.act-ev--check-out { background: #eff5fe; border-color: #bfdbfe; color: #1d4ed8; }
+.act-ev--check-out .act-ev__dot { background: #3b82f6; }
+.act-ev--reservation { background: #f4eaff; border-color: #e9d5ff; color: #5a00c6; }
+.act-ev--reservation .act-ev__dot { background: var(--purple-strong); }
+.act-ev--cleaned { background: #ecfeff; border-color: #a5f3fc; color: #0e7490; }
+.act-ev--cleaned .act-ev__dot { background: #06b6d4; }
+.act-ev--issue { background: #fef2f2; border-color: #fecaca; color: #dc2626; }
+.act-ev--issue .act-ev__dot { background: #dc2626; }
+
+.act-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  background: var(--bg-page, #fef7ff);
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* The handover signatures — paper only. */
+.act-signoff { display: none; }
+
+/* =========================================================================
+   PRINT
+   What comes out of the printer is a handover sheet: no chrome, no colour,
+   black on white, with somewhere for two people to sign.
+   ========================================================================= */
+@media print {
+  /* `html, body, #root { height: 100% }` up at the top pins the document to
+     exactly one screen. On paper that clips everything past the first
+     viewport — which is why this sheet printed blank. Releasing the height
+     here lets the content run as long as it needs. */
+  html, body, #root {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
+  /* Nothing that isn't the report. */
+  .sidebar, .topbar, .act-controls, .room-actions-row,
+  .category-tabs, .cat-tabs, .hk-ribbon, .room-caption,
+  .modal-overlay {
+    display: none !important;
+  }
+
+  body, .room-page, .act-page, .room-main {
+    background: #fff !important;
+    margin: 0;
+    padding: 0;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .act-title { font-size: 20pt; }
+  .act-date { color: #000; }
+
+  /* Flat black and white — printer ink is expensive and colour adds nothing
+     to a signed record. */
+  .act-stats, .act-card {
+    border: 1px solid #000 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+  .act-stat__label, .act-stat__note { color: #000 !important; }
+  .act-stats__divider { background: #000 !important; }
+
+  .act-table thead tr { background: #fff !important; border-bottom: 2px solid #000 !important; }
+  .act-table th, .act-table td {
+    padding: 8px 10px !important;
+    font-size: 9pt !important;
+    color: #000 !important;
+    border-top: 1px solid #000 !important;
+  }
+  /* The event tag becomes plain text — a coloured pill prints as a grey blob. */
+  .act-ev {
+    border: 0 !important;
+    background: none !important;
+    color: #000 !important;
+    padding: 0 !important;
+    font-weight: 600;
+  }
+  .act-ev__dot { display: none !important; }
+  .act-foot { background: #fff !important; border-top: 1px solid #000 !important; color: #000 !important; }
+
+  /* And the reason it's printed at all. */
+  .act-signoff {
+    display: flex !important;
+    gap: 48px;
+    margin-top: 32px;
+    break-inside: avoid;
+  }
+  .act-signoff__block { flex: 1; }
+  .act-signoff__name {
+    margin: 0 0 32px;
+    font-size: 9pt;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #000;
+  }
+  .act-signoff__line { height: 1px; background: #000; width: 70%; }
+  .act-signoff__cap {
+    margin: 6px 0 0;
+    font-size: 8pt;
+    letter-spacing: 0.5px;
+    color: #000;
+  }
+
+  /* Stated explicitly: the receipt also declares a page size, and an
+     unstated default would be at its mercy. */
+  @page { size: A4; margin: 14mm; }
+}
+
+@media (max-width: 1000px) {
+  .act-stats { flex-wrap: wrap; gap: 16px; }
+  .act-stats__divider { display: none; }
+  .act-stat { flex: 1 1 140px; }
+}
+
+/* Bar event tags — the bar's day has different kinds of event from
+   reception's, so they get their own colours. */
+.act-ev--sale { background: #ecfdf5; border-color: #a7f3d0; color: #059669; }
+.act-ev--sale .act-ev__dot { background: #059669; }
+.act-ev--requested { background: #f4eaff; border-color: #e9d5ff; color: #5a00c6; }
+.act-ev--requested .act-ev__dot { background: var(--purple-strong); }
+.act-ev--received { background: #ecfeff; border-color: #a5f3fc; color: #0e7490; }
+.act-ev--received .act-ev__dot { background: #06b6d4; }
+
+/* Store event tags. */
+.act-ev--issued { background: #fff7ed; border-color: #fed7aa; color: #c2410c; }
+.act-ev--issued .act-ev__dot { background: #f97316; }
+.act-ev--returned { background: #ecfdf5; border-color: #a7f3d0; color: #059669; }
+.act-ev--returned .act-ev__dot { background: #059669; }
+.act-ev--topped-up { background: #f4eaff; border-color: #e9d5ff; color: #5a00c6; }
+.act-ev--topped-up .act-ev__dot { background: var(--purple-strong); }
