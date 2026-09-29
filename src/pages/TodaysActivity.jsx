@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import TopBar from "../components/TopBar.jsx";
+import ModuleHeader from "../components/ModuleHeader.jsx";
 import { getRoomActivity } from "../api.js";
 
 function naira(n) {
@@ -67,7 +67,7 @@ export default function TodaysActivity() {
 
   return (
     <div className="room-page act-page">
-      <TopBar title="Room Dashboard" />
+      <ModuleHeader module="Reception" />
 
       <div className="room-main">
         {/* Header: title + date on the left, controls on the right */}

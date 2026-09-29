@@ -11,7 +11,7 @@ import BarReport from "./pages/BarReport.jsx";
 import BarEditDrinks from "./pages/BarEditDrinks.jsx";
 import StockTopUp from "./pages/StockTopUp.jsx";
 import StockHistory from "./pages/StockHistory.jsx";
-import { IssueStock, ReturnStock } from "./pages/StockMovement.jsx";
+import StockMovement, { IssueStock } from "./pages/StockMovement.jsx";
 import Accounts from "./pages/Accounts.jsx";
 import Reservations from "./pages/Reservations.jsx";
 import ReservationCreate from "./pages/ReservationCreate.jsx";
@@ -22,6 +22,8 @@ import AccountingExpenses from "./pages/AccountingExpenses.jsx";
 import TodaysActivity from "./pages/TodaysActivity.jsx";
 import BarActivity from "./pages/BarActivity.jsx";
 import StoreActivity from "./pages/StoreActivity.jsx";
+import Maintenance from "./pages/Maintenance.jsx";
+import MaintenanceActivity from "./pages/MaintenanceActivity.jsx";
 
 
 export default function App() {
@@ -51,7 +53,7 @@ export default function App() {
 
       {/* Store — storekeeper */}
       <Route path="/stock/issue" element={<IssueStock />} />
-      <Route path="/stock/return" element={<ReturnStock />} />
+      
       
       {/* Accounts (admin) */}
       <Route path="/account" element={<Accounts />} />
@@ -70,7 +72,10 @@ export default function App() {
       <Route path="/room-activity" element={<TodaysActivity />} />
       <Route path="/bar-activity" element={<BarActivity />} />
       <Route path="/stock-activity" element={<StoreActivity />} />
+      <Route path="/maintenance-activity" element={<MaintenanceActivity />} />
 
+
+      <Route path="/maintenance" element={<Maintenance />} />
     </Routes>
   );
 }

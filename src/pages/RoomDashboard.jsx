@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import TopBar from "../components/TopBar.jsx";
+import ModuleHeader from "../components/ModuleHeader.jsx";
 import CategoryTabs from "../components/CategoryTabs.jsx";
 import StatusFilterPanel from "../components/StatusFilterPanel.jsx";
 import RoomCard from "../components/RoomCard.jsx";
@@ -111,7 +111,7 @@ export default function RoomDashboard() {
 
   return (
     <div className="room-page">
-      <TopBar title="Room Dashboard" />
+      <ModuleHeader module="Reception" />
 
       <div className="room-main">
         {/* Two purple text links, right-aligned above the category tabs. */}

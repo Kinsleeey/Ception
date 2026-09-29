@@ -9,6 +9,7 @@ import {
   addToCart, updateCartItem, removeCartItem, checkoutOrder, getAccounts,
   getStockRequests, getIssues,
 } from "../api.js";
+import ModuleHeader from "../components/ModuleHeader.jsx";
 import BarReceipt from "../components/BarReceipt.jsx";
 import RequestStockModal from "../components/RequestStockModal.jsx";
 import StockRequestsModal from "../components/StockRequestsModal.jsx";
@@ -186,19 +187,11 @@ export default function BartenderDashboard() {
   const paymentOptions = ["Cash", "Direct Bank Transfer", "Card", "POS",
     ...accounts.map((a) => a.name)];
 
+  // The header spans the whole page and the sidebar sits beneath it, so the
+  // wordmark reads once, at the top, as in every other module.
   return (
-    <div className="dashboard">
-      {/* Sidebar now receives the lifted state + a way to change it. */}
-      <BarSidebar activeLocation={location} onSelect={setLocation} />
-
-      <div className="main">
-        <header className="topbar topbar--bordered">
-          <ArrowLeftIcon size={20} />
-          <span className="topbar__title">Products — {location}</span>
-
-          {/* Stock requests live in the top bar because they're about this bar
-              as a whole, not about the cart. */}
-          <div className="bar-topbar__actions">
+    <div className="bar-page">
+      <ModuleHeader module={location}>
             <button className="room-action-link" onClick={() => setStockModal("request")}>
               Request Stock
             </button>
@@ -230,8 +223,12 @@ export default function BartenderDashboard() {
             <Link className="room-action-link" to="/bar-activity">
               Today's Activity
             </Link>
-          </div>
-        </header>
+      </ModuleHeader>
+
+      <div className="bar-body">
+        <BarSidebar activeLocation={location} onSelect={setLocation} />
+
+        <div className="main">
 
         <div className="bar-layout">
           <div className="content bar-content">
@@ -319,6 +316,7 @@ export default function BartenderDashboard() {
             />
           )}
         </div>
+        </div>
       </div>
 
       {confirmPrint && (
@@ -359,7 +357,6 @@ export default function BartenderDashboard() {
           onSaved={async () => { setIssueModal(null); await loadIssueCount(); }}
         />
       )}
-
       {issueModal === "list" && (
         <MyReportsModal department="Bar" onClose={() => setIssueModal(null)} />
       )}

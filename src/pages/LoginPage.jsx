@@ -25,7 +25,12 @@ const roleContent = {
     title: "Store Login",
     subtitle: "Enter your credentials to manage stock in store",
     firstField: { label: "Name", placeholder: "e.g Patrick", type: "text" },
-  }
+  },
+    maintenance: {
+    title: "Maintenance Login",
+    subtitle: "Enter your credentials to see reported faults",
+    firstField: { label: "Name", placeholder: "e.g Danjuma", type: "text" },
+  },
 };
 
 export default function LoginPage() {
@@ -54,6 +59,8 @@ export default function LoginPage() {
       navigate("/bar");
     } else if (role === "storekeeper") {
       navigate("/stock/issue");
+    } else if (role === "maintenance") {
+      navigate("/maintenance"); 
     } else {
       alert(`The "${role}" area is not built yet — coming in a later batch.`);
     }

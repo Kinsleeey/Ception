@@ -8095,3 +8095,663 @@ textarea:focus-visible,
 .act-ev--returned .act-ev__dot { background: #059669; }
 .act-ev--topped-up { background: #f4eaff; border-color: #e9d5ff; color: #5a00c6; }
 .act-ev--topped-up .act-ev__dot { background: var(--purple-strong); }
+
+/* =========================================================================
+   MAINTENANCE — the fault queue and the admin's approvals popup
+   Colours from the Figma frames.
+   ========================================================================= */
+
+.mt-page { min-height: 100%; background: var(--bg-page, #fef7ff); }
+
+/* ---- Page head ---- */
+.mt-main {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  max-width: 1280px;
+  /* Without this the max-width just pins everything to the left edge. */
+  margin: 0 auto;
+  padding: 32px 32px 96px;
+}
+.mt-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+.mt-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 36px;
+  letter-spacing: -0.6px;
+  color: #151c27;
+}
+.mt-sub { margin: 2px 0 0; font-size: 14px; line-height: 21px; color: var(--text-muted); }
+.mt-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.mt-live__dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; }
+
+/* ---- Stats strip ---- */
+.mt-stats {
+  display: flex;
+  width: 100%;
+  padding: 21px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  filter: drop-shadow(0 2px 4px rgba(99, 14, 212, 0.03));
+}
+.mt-stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 20px 0 21px;
+  border-left: 1px solid rgba(204, 195, 216, 0.4);
+}
+.mt-stat:first-child { border-left: 0; padding-left: 8px; }
+.mt-stat__label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: -0.55px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.mt-stat__value {
+  font-family: "Liberation Mono", ui-monospace, monospace;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 35px;
+  padding-top: 2px;
+}
+.mt-stat__value--open { color: var(--purple-strong); }
+.mt-stat__value--progress { color: #d97706; }
+.mt-stat__value--high { color: #dc2626; }
+.mt-stat__value--resolved { color: #059669; }
+.mt-stat__note { font-size: 12px; line-height: 18px; color: var(--text-muted); }
+
+/* ---- Filters ---- */
+.mt-filters {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 0;
+  flex-wrap: wrap;
+}
+.mt-filtergroup { display: flex; align-items: center; gap: 8px; }
+.mt-filterlabel {
+  padding-right: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: -0.55px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.mt-chip {
+  padding: 7px 17px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--white);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-body);
+  cursor: pointer;
+}
+.mt-chip--on {
+  background: var(--purple-strong);
+  border-color: var(--purple-strong);
+  color: var(--white);
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.05));
+}
+.mt-sub-chip {
+  padding: 5px 13px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--white);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-body);
+  cursor: pointer;
+}
+.mt-sub-chip--on { background: #151c27; border-color: #151c27; color: var(--white); }
+
+/* ---- Fault cards ---- */
+.mt-list { display: flex; flex-direction: column; gap: 16px; }
+.mt-empty { padding: 32px; text-align: center; color: var(--text-muted); }
+.mt-empty--error { color: #c0392b; }
+.mt-emptycard {
+  padding: 33px;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px dashed rgba(204, 195, 216, 0.6);
+  border-radius: 18px;
+  text-align: center;
+}
+.mt-emptycard__text { margin: 0; font-size: 14px; font-weight: 500; color: var(--text-muted); }
+
+.mt-card {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  padding: 25px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.02));
+}
+/* A resolved fault is history — dimmed, and its actions are gone. */
+.mt-card--done { opacity: 0.6; }
+
+.mt-card__top { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.mt-card__where { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.mt-place { font-size: 16px; font-weight: 600; line-height: 24px; color: #151c27; }
+.mt-place--done { text-decoration: line-through; }
+.mt-card__when { font-size: 12px; line-height: 18px; color: var(--text-muted); white-space: nowrap; }
+
+.mt-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 11px;
+  border: 1px solid;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: -0.275px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.mt-tag__dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.mt-tag--dept { background: #faf5ff; border-color: rgba(99, 14, 212, 0.2); color: var(--purple-strong); }
+.mt-tag--high { background: #fef2f2; border-color: #fecaca; color: #b91c1c; }
+.mt-tag--medium { background: #fffbeb; border-color: #fde68a; color: #b45309; }
+.mt-tag--low { background: #f1f5f9; border-color: #e2e8f0; color: #475569; }
+.mt-tag--muted { background: #f1f5f9; border-color: #e2e8f0; color: #475569; }
+
+.mt-card__desc {
+  margin: 0;
+  padding-bottom: 6px;
+  font-size: 14px;
+  line-height: 22.75px;
+  color: var(--text-body);
+}
+.mt-card__rule { height: 1px; background: rgba(204, 195, 216, 0.4); }
+
+.mt-card__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 5px;
+  flex-wrap: wrap;
+}
+.mt-card__state { display: flex; align-items: center; gap: 16px; }
+
+.mt-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 13px;
+  border: 1px solid;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.mt-status__dot { width: 6px; height: 6px; border-radius: 50%; }
+.mt-status--received { background: #f4f3f6; border-color: #e5e3ea; color: var(--text-body); }
+.mt-status--received .mt-status__dot { background: #7b7487; }
+.mt-status--in-progress { background: #fffbeb; border-color: #fde68a; color: #92400e; }
+.mt-status--in-progress .mt-status__dot { background: #f59e0b; }
+.mt-status--resolved { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; }
+.mt-status--resolved .mt-status__dot { background: #10b981; }
+
+/* A refusal is worth seeing on the card — it's why the fault is still open
+   with no money behind it. */
+.mt-money--declined {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #dc2626;
+  font-family: Inter, system-ui, sans-serif;
+  font-weight: 500;
+  font-size: 12px;
+}
+
+.mt-money {
+  padding: 5px 11px;
+  border: 1px solid rgba(99, 14, 212, 0.2);
+  border-radius: 6px;
+  background: #f4ebff;
+  font-family: "Liberation Mono", ui-monospace, monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--purple-strong);
+  white-space: nowrap;
+}
+
+.mt-card__actions { display: flex; align-items: center; gap: 10px; }
+.mt-btn-outline {
+  padding: 7px 17px;
+  border: 1px solid var(--purple-strong);
+  border-radius: var(--radius-pill);
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--purple-strong);
+  cursor: pointer;
+}
+.mt-btn-outline:hover { background: var(--bg-sidebar); }
+.mt-btn-solid {
+  padding: 7px 16px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--purple-strong);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--white);
+  cursor: pointer;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.05));
+}
+.mt-btn-solid:hover { opacity: 0.92; }
+
+/* Nothing to do but wait — so no button is offered. */
+.mt-waiting {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 15px;
+  border: 1px solid #fcd34d;
+  border-radius: var(--radius-pill);
+  background: #fffbeb;
+  font-size: 12px;
+  font-weight: 500;
+  color: #92400e;
+  white-space: nowrap;
+}
+.mt-closed { font-size: 12px; font-weight: 500; color: #047857; }
+
+/* ---- Request Payment popup extras ---- */
+.mt-fault {
+  padding: 14px 16px;
+  background: var(--bg-sidebar);
+  border-radius: 12px;
+}
+.mt-fault__label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: -0.55px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.mt-fault__text { margin: 4px 0 0; font-size: 14px; line-height: 21px; color: var(--text-dark); }
+.mt-textarea { resize: vertical; min-height: 84px; line-height: 22px; }
+.mt-hint { padding-top: 4px; font-size: 12px; color: var(--text-muted); }
+
+/* =========================================================================
+   MAINTENANCE — the admin's approvals popup
+   ========================================================================= */
+.mr2-card {
+  width: 640px;
+  max-width: 100%;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--white);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(21, 28, 39, 0.22);
+}
+.mr2-hairline { height: 1px; background: #f0eaf7; flex-shrink: 0; }
+.mr2-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 20px 24px;
+  flex-shrink: 0;
+}
+.mr2-title { margin: 0; font-size: 20px; font-weight: 600; line-height: 28px; color: #151c27; }
+.mr2-subtitle { margin: 1px 0 0; font-size: 14px; line-height: 20px; color: var(--text-muted); }
+
+.mr2-body { flex: 1; min-height: 0; overflow-y: auto; padding: 24px; }
+
+.mr2-summary {
+  display: flex;
+  padding: 15px 21px;
+  background: var(--bg-sidebar);
+  border-radius: 12px;
+}
+.mr2-metric { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.mr2-metric__label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: -0.55px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.mr2-metric__value {
+  font-family: "Liberation Mono", ui-monospace, monospace;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 28px;
+}
+.mr2-metric__value--await { color: var(--purple-strong); }
+.mr2-metric__value--ok { color: #059669; }
+.mr2-metric__value--no { color: var(--text-muted); }
+.mr2-metric__note { font-size: 11px; color: var(--text-muted); }
+
+.mr2-sectionhead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 0 12px;
+}
+
+/* One request awaiting a decision */
+.mr2-req {
+  padding: 19px;
+  margin-bottom: 14px;
+  background: #fcf9ff;
+  border: 1px solid #eee5f5;
+  border-radius: 14px;
+}
+.mr2-req__top { display: flex; align-items: baseline; justify-content: space-between; }
+.mr2-amount {
+  font-family: "Liberation Mono", ui-monospace, monospace;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 33px;
+  color: var(--purple-strong);
+}
+.mr2-when { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+.mr2-place { margin: 12px 0 0; font-size: 14px; font-weight: 600; line-height: 21px; color: #151c27; }
+.mr2-reason { margin: 3px 0 0; font-size: 13px; line-height: 22px; color: var(--text-muted); }
+.mr2-req__rule { height: 1px; background: #eee5f5; margin: 14px 0; }
+
+.mr2-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.mr2-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.mr2-hint__dot { width: 6px; height: 6px; border-radius: 50%; background: #059669; }
+/* On the card means the money HASN'T left — worth saying, not just implying. */
+.mr2-hint--card { color: #b45309; }
+.mr2-hint--card .mr2-hint__dot { background: #f59e0b; }
+
+.mr2-req__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 16px;
+}
+.mr2-decline {
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-body);
+  cursor: pointer;
+}
+.mr2-decline:hover { background: #f0eaf7; }
+.mr2-approve {
+  padding: 8px 20px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--purple-strong);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--white);
+  cursor: pointer;
+}
+.mr2-approve:hover:not(:disabled) { opacity: 0.92; }
+.mr2-approve:disabled, .mr2-decline:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Already decided */
+.mr2-history {
+  border: 1px solid #f0eaf7;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.mr2-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border-bottom: 1px solid #f0eaf7;
+}
+.mr2-row:last-child { border-bottom: 0; }
+.mr2-row__amount {
+  font-family: "Liberation Mono", ui-monospace, monospace;
+  font-size: 14px;
+  font-weight: 700;
+  color: #151c27;
+  white-space: nowrap;
+  min-width: 78px;
+}
+.mr2-row__info { flex: 1; min-width: 0; }
+.mr2-row__place { font-size: 13px; font-weight: 500; color: var(--text-dark); }
+.mr2-row__reason {
+  font-size: 12px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mr2-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.mr2-badge__dot { width: 6px; height: 6px; border-radius: 50%; }
+.mr2-badge--approved { background: #ecfdf5; color: #059669; }
+.mr2-badge--approved .mr2-badge__dot { background: #059669; }
+.mr2-badge--declined { background: #f4f3f6; color: var(--text-body); }
+.mr2-badge--declined .mr2-badge__dot { background: #9ca3af; }
+
+/* The Expenses Card's two links */
+.exp-card__links { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+.exp-card__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  margin-left: 6px;
+  padding: 0 5px;
+  border-radius: var(--radius-pill);
+  background: var(--purple-strong);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--white);
+}
+
+@media (max-width: 900px) {
+  .mt-stats { flex-wrap: wrap; gap: 16px; }
+  .mt-stat { flex: 1 1 140px; border-left: 0; padding-left: 8px; }
+  .mr2-fields { grid-template-columns: 1fr; }
+}
+
+/* Maintenance event tags on its activity sheet. */
+.act-ev--reported { background: #f4f3f6; border-color: #e5e3ea; color: #4a4455; }
+.act-ev--reported .act-ev__dot { background: #7b7487; }
+.act-ev--requested { background: #f4eaff; border-color: #e9d5ff; color: #5a00c6; }
+.act-ev--requested .act-ev__dot { background: #630ed4; }
+.act-ev--approved { background: #ecfdf5; border-color: #a7f3d0; color: #059669; }
+.act-ev--approved .act-ev__dot { background: #059669; }
+.act-ev--declined { background: #fef2f2; border-color: #fecaca; color: #dc2626; }
+.act-ev--declined .act-ev__dot { background: #dc2626; }
+
+/* Controls sitting at the right end of an admin page's top bar. */
+.topbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+/* Resolved shows on the maintenance activity sheet. */
+.act-ev--resolved { background: #ecfdf5; border-color: #a7f3d0; color: #059669; }
+.act-ev--resolved .act-ev__dot { background: #10b981; }
+/* =========================================================================
+   MODULE HEADER
+   The bar across the top of every department screen — reception, bar, store,
+   maintenance. One set of rules so the four can't drift apart.
+   Admin screens keep the sidebar instead.
+   ========================================================================= */
+
+.mod-header {
+  width: 100%;
+  background: var(--white);
+  border-bottom: 1px solid rgba(204, 195, 216, 0.4);
+}
+/* The bar spans the window; its CONTENTS are centred and capped, so they line
+   up with the page beneath. */
+.mod-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-6);
+  width: 100%;
+  max-width: 1280px;
+  height: 64px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+.mod-header__brand { display: flex; align-items: center; gap: 14px; }
+
+/* Back sits before the wordmark — leftmost, where the eye looks for it. */
+.mod-header__back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  margin-right: -2px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--text-body);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.mod-header__back:hover {
+  background: var(--bg-sidebar);
+  color: var(--purple-strong);
+}
+.mod-header__back:focus-visible {
+  outline: 2px solid var(--purple-strong);
+  outline-offset: 2px;
+}
+.mod-header__rule {
+  width: 1px;
+  height: 20px;
+  background: rgba(204, 195, 216, 0.6);
+}
+.mod-header__module {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-dark);
+  white-space: nowrap;
+}
+
+.mod-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+@media (max-width: 700px) {
+  .mod-header__inner { height: auto; padding: 12px 20px; flex-wrap: wrap; gap: 12px; }
+}
+
+/* =========================================================================
+   BAR — page layout
+   The header spans the window; the sidebar sits BENEATH it rather than beside
+   it, so the wordmark reads once at the top like every other module.
+   ========================================================================= */
+
+.bar-page {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-white);
+}
+
+/* Sidebar and main content, side by side, below the header. */
+.bar-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: stretch;
+}
+
+/* Narrower than the admin sidebar — it holds three short names, not a nav
+   tree, so 256px was mostly empty space. */
+.bar-sidebar {
+  width: 180px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 20px 12px;
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border-faint);
+}
+.bar-sidebar__label {
+  padding: 0 10px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: -0.55px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* The .main inside .bar-body must not re-apply the dashboard's own padding. */
+.bar-body .main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 800px) {
+  .bar-body { flex-direction: column; }
+  .bar-sidebar {
+    width: 100%;
+    flex-direction: row;
+    overflow-x: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--border-faint);
+  }
+  .bar-sidebar__label { display: none; }
+}

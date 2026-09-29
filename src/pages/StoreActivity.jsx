@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
+import ModuleHeader from "../components/ModuleHeader.jsx";
 import { useNavigate } from "react-router-dom";
-import { BoxIcon } from "../components/icons.jsx";
 import { getStoreActivity } from "../api.js";
 
 function clockTime(ts) {
@@ -59,10 +59,7 @@ export default function StoreActivity() {
 
   return (
     <div className="room-page act-page">
-      <header className="topbar topbar--bordered">
-        <BoxIcon size={20} />
-        <span className="topbar__title">Store</span>
-      </header>
+      <ModuleHeader module="Store" />
 
       <div className="room-main">
         <div className="act-head">

@@ -2,13 +2,13 @@ import { useMemo, useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { SearchIcon } from "../components/icons.jsx";
 import { getStockItems, getStockCategories, createStockMovement , getStockRequests, getIssues} from "../api.js";
+import ModuleHeader from "../components/ModuleHeader.jsx";
 import StockRequestsInbox from "../components/StockRequestsInbox.jsx";
 import DeptIssueModal from "../components/DeptIssueModal.jsx";
 import MyReportsModal from "../components/MyReportsModal.jsx";
 
 const COPY = {
-  issue:  { panelTitle: "Stock to be issued",   partyLabel: "Issued to",     partyPlaceholder: "Enter recipient name or department", switchTo: "Return Stock" },
-  return: { panelTitle: "Stock to be Returned", partyLabel: "Returned from", partyPlaceholder: "Enter name or department",           switchTo: "Issue Stock" },
+  issue: { panelTitle: "Stock to be issued", partyLabel: "Issued to", partyPlaceholder: "Enter recipient name or department" },
 };
 
 function BoxIcon() {
@@ -21,7 +21,7 @@ function BoxIcon() {
   );
 }
 
-// StockMovement is the storekeeper's issue / return screen. It is a standalone
+// StockMovement is the storekeeper's issue screen. It is a standalone
 // full-width screen (no admin sidebar). Like the other pages it fetches its own
 // data (stock items + categories) and saves itself. `mode` decides which flow
 // this is; the two thin wrappers at the bottom set it.
@@ -136,7 +136,7 @@ export default function StockMovement({ mode = "issue" }) {
     try {
       setSaving(true);
       await createStockMovement({
-        direction: mode,             // "issue" | "return"
+        direction: "issue",          // the store only sends stock out now
         party: party.trim(),
         staff_name: null,            // no auth yet
         items: selectedEntries.map(({ product, quantity, unit }) => ({
@@ -169,13 +169,7 @@ export default function StockMovement({ mode = "issue" }) {
 
   return (
     <div className="stock">
-      <header className="stock-header">
-        <div className="stock-header__brand">
-          <BoxIcon />
-          <h2 className="stock-header__title">Stock</h2>
-        </div>
-
-        <div className="stock-header__actions">
+      <ModuleHeader module="Store">
           <button className="room-action-link" onClick={() => setStoreModal("requests")}>
             Stock Requests
           </button>
@@ -207,8 +201,7 @@ export default function StockMovement({ mode = "issue" }) {
           <Link className="room-action-link" to="/stock-activity">
             Today's Activity
           </Link>
-        </div>
-      </header>
+      </ModuleHeader>
 
       <div className="stock-layout">
         <main className={`stock-main ${hasSelection ? "stock-main--narrow" : ""}`}>
@@ -281,13 +274,6 @@ export default function StockMovement({ mode = "issue" }) {
           </div>
 
           {/* Cross-flow CTA */}
-          <button
-            type="button"
-            className="stock-cta"
-            onClick={() => navigate(`/stock/${mode === "issue" ? "return" : "issue"}`)}
-          >
-            {copy.switchTo}
-          </button>
         </main>
 
         {/* Right panel — only once something is selected */}
@@ -376,5 +362,4 @@ export default function StockMovement({ mode = "issue" }) {
   );
 }
 
-export const IssueStock  = () => <StockMovement mode="issue" />;
-export const ReturnStock = () => <StockMovement mode="return" />;
+export const IssueStock = () => <StockMovement mode="issue" />;

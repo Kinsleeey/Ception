@@ -573,6 +573,7 @@ export function getStoreActivity(date) {
   return request(`/api/stock/activity${query}`);
 }
 
+
 // ----- Maintenance -----
 
 export function getMaintenanceRequests(status) {

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
+import ModuleHeader from "../components/ModuleHeader.jsx";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeftIcon } from "../components/icons.jsx";
 import { getBarActivity } from "../api.js";
 
 function naira(n) {
@@ -67,10 +67,7 @@ export default function BarActivity() {
 
   return (
     <div className="room-page act-page">
-      <header className="topbar topbar--bordered">
-        <ArrowLeftIcon size={20} />
-        <span className="topbar__title">{barLocation}</span>
-      </header>
+      <ModuleHeader module={barLocation} />
 
       <div className="room-main">
         <div className="act-head">

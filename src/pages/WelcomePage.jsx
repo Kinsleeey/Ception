@@ -23,7 +23,7 @@ const departments = [
   { id: "recreation",   title: "Recreational Facilities", Icon: SwimmerIcon,   ready: false },
   { id: "storekeeper",  title: "Store",                  Icon: StorefrontIcon, to: "/login/storekeeper",  ready: true },
   { id: "power",        title: "Power",                  Icon: LightningIcon,  ready: false },
-  { id: "maintenance",  title: "Maintenance",            Icon: WrenchIcon,     ready: false },
+  { id: "maintenance",  title: "Maintenance",            Icon: WrenchIcon,     to: "/login/maintenance", ready: true },
 ];
 
 // One card. Ready ones are links; the rest are inert, dimmed, and say why on
@@ -62,13 +62,13 @@ export default function WelcomePage() {
       <div className="welcome__inner">
         {/* Brand — the wordmark carries its own subtitle. */}
         <div className="welcome__brand">
-          <Logo height={36} />
+          <Logo height={72} />
         </div>
 
         {/* Headline */}
         <div className="welcome__intro">
           <h1 className="welcome__heading">Welcome</h1>
-          <p className="welcome__subheading" style={{fontSize:"12px"}}>
+          <p className="welcome__subheading">
             Sign in to manage operations, guests, and reservations
           </p>
         </div>

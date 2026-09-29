@@ -2,11 +2,13 @@ import { useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import Sidebar from "../components/Sidebar.jsx";
 import OutstandingExpensesModal from "../components/OutstandingExpensesModal.jsx";
+import MaintenanceRequestsModal from "../components/MaintenanceRequestsModal.jsx";
 import VoidReasonModal from "../components/VoidReasonModal.jsx";
 import { GridIcon, SearchIcon, ChevronDownIcon } from "../components/icons.jsx";
 import { CATEGORY_STYLES } from "../data/expensesData.js";
 import {
   getExpenses, getUnpaidExpenses, getAcctCategories, voidExpense,
+  getMaintenanceRequests,
 } from "../api.js";
 
 // The main table lists expenses PAID at the time they were incurred. Unpaid
@@ -61,6 +63,20 @@ export default function AccountingExpenses() {
   const [page, setPage] = useState(1);
 
   const [showUnpaid, setShowUnpaid] = useState(false);
+
+  // Maintenance asking for money to fix faults. Lives here because approving
+  // one creates an expense — it belongs with the expenses, not on its own page.
+  const [showRequests, setShowRequests] = useState(false);
+  const [pendingRequests, setPendingRequests] = useState(0);
+
+  async function loadRequestCount() {
+    try {
+      const d = await getMaintenanceRequests("Pending");
+      setPendingRequests(d.pendingCount || 0);
+    } catch { setPendingRequests(0); }
+  }
+
+  useEffect(() => { loadRequestCount(); }, []);
   const [viewingVoid, setViewingVoid] = useState(null);
 
   const [rows, setRows] = useState([]);
@@ -147,6 +163,23 @@ export default function AccountingExpenses() {
         <header className="topbar">
           <GridIcon size={22} />
           <span className="topbar__title sales-title">Expenses</span>
+
+          {/* Maintenance asking for money. It sits up here rather than on the
+              Expenses Card because it's an inbox needing a decision, not a
+              property of the card. */}
+          <div className="topbar__actions">
+            <button className="room-action-link" onClick={() => setShowRequests(true)}>
+              View Money Requests
+            </button>
+            <button
+              className="issue-badge"
+              onClick={() => setShowRequests(true)}
+              aria-label={`${pendingRequests} request${pendingRequests === 1 ? "" : "s"} awaiting`}
+              title="Requests awaiting a decision"
+            >
+              {pendingRequests}
+            </button>
+          </div>
         </header>
 
         <div className="content">
@@ -341,6 +374,13 @@ export default function AccountingExpenses() {
         <OutstandingExpensesModal
           onClose={() => setShowUnpaid(false)}
           onChanged={async () => { await loadCard(); await load(); }}
+        />
+      )}
+
+      {showRequests && (
+        <MaintenanceRequestsModal
+          onClose={() => setShowRequests(false)}
+          onChanged={async () => { await loadRequestCount(); await loadCard(); await load(); }}
         />
       )}
 
