@@ -9,7 +9,7 @@
 // A month's derived figures. Kept here so the table, the YTD row and the
 // summary all read the same numbers.
 export function derive(m) {
-  const totalSales = m.rooms + m.bar;
+  const totalSales = m.rooms + m.bar + m.kitchen;
   const profit = totalSales - m.expenses;
   const totalCashIn = m.salesPaid + m.oldDebt + m.futDep + m.addOnsIn;
   const totalCashOut = m.expPaid + m.pastExpSet + m.expPre + m.addOnsOut + m.refunds;
@@ -34,7 +34,7 @@ export function toRows(months) {
 export function toYTD(rows) {
   return (rows || []).reduce((acc, r) => {
     for (const k of [
-      "rooms", "bar", "salesOwed", "expenses",
+      "rooms", "bar", "kitchen", "salesOwed", "expenses",
       "salesPaid", "oldDebt", "futDep", "addOnsIn",
       "expPaid", "pastExpSet", "expPre", "addOnsOut", "refunds",
       "totalSales", "profit", "totalCashIn", "totalCashOut", "net",
@@ -48,8 +48,9 @@ export function toYTD(rows) {
 // Explanations shown by the info icon on each column header.
 export const COLUMN_INFO = {
   rooms: "Revenue from room bookings — every stay that started this month.",
-  bar: "Revenue from bar orders across all bar locations.",
-  totalSales: "Rooms + Bar. Everything earned this month, paid or not.",
+  bar: "Revenue from bar orders across Bar 1, Bar 2 and the Lounge — drink sales only.",
+  kitchen: "Revenue from food sold by the kitchen. Kept apart from the bar so food and drink can be read separately.",
+  totalSales: "Rooms + Bar + Kitchen. Everything earned this month, paid or not.",
   salesOwed: "Sales made this month that haven't been paid for yet — mostly corporate accounts.",
   expenses: "Every cost incurred this month, whether or not it has been paid. An expense put on the Expenses Card counts here immediately — the cost is real even though the cash hasn't left yet. That's why this figure and Expenses Paid differ.",
   profit: "Total Sales minus Expenses. What the month earned on paper — it counts sales that haven't been paid for and costs that haven't been settled, so it is not the same as cash in the bank.",

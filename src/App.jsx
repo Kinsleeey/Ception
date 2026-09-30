@@ -24,7 +24,8 @@ import BarActivity from "./pages/BarActivity.jsx";
 import StoreActivity from "./pages/StoreActivity.jsx";
 import Maintenance from "./pages/Maintenance.jsx";
 import MaintenanceActivity from "./pages/MaintenanceActivity.jsx";
-
+import KitchenDashboard from "./pages/KitchenDashboard.jsx";
+import KitchenActivity from "./pages/KitchenActivity.jsx";
 
 export default function App() {
   return (
@@ -73,9 +74,11 @@ export default function App() {
       <Route path="/bar-activity" element={<BarActivity />} />
       <Route path="/stock-activity" element={<StoreActivity />} />
       <Route path="/maintenance-activity" element={<MaintenanceActivity />} />
+      <Route path="/kitchen-activity" element={<KitchenActivity />} />
 
 
       <Route path="/maintenance" element={<Maintenance />} />
+      <Route path="/kitchen" element={<KitchenDashboard />} />
     </Routes>
   );
 }

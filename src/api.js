@@ -145,10 +145,14 @@ export function getProducts({ bar_location, category_id } = {}) {
   return request(`/api/products${query}`);
 }
 
-export function getBarCategories() {
-  return request("/api/bar-categories");
+// Drink or food categories. Pass a location to get only the ones with products
+// there — otherwise the bar shows "Rice" and the kitchen shows "Spirits".
+export function getBarCategories(barLocation) {
+  const query = barLocation
+    ? `?bar_location=${encodeURIComponent(barLocation)}`
+    : "";
+  return request(`/api/bar-categories${query}`);
 }
-
 // ----- Bar: cart -----
 
 export function getCart(barLocation) {

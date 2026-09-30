@@ -31,6 +31,11 @@ const roleContent = {
     subtitle: "Enter your credentials to see reported faults",
     firstField: { label: "Name", placeholder: "e.g Danjuma", type: "text" },
   },
+    kitchen: {
+    title: "Kitchen Login",
+    subtitle: "Enter your credentials to take food orders",
+    firstField: { label: "Name", placeholder: "e.g Ifeoma", type: "text" },
+  },
 };
 
 export default function LoginPage() {
@@ -61,6 +66,8 @@ export default function LoginPage() {
       navigate("/stock/issue");
     } else if (role === "maintenance") {
       navigate("/maintenance"); 
+    } else if (role === "kitchen") {
+      navigate("/kitchen");
     } else {
       alert(`The "${role}" area is not built yet — coming in a later batch.`);
     }

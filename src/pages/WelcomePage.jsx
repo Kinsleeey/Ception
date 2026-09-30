@@ -17,7 +17,7 @@ import {
 const departments = [
   { id: "receptionist", title: "Reception",              Icon: CallBellIcon,   to: "/login/receptionist", ready: true },
   { id: "bartender",    title: "Bar",                    Icon: MartiniIcon,    to: "/login/bartender",    ready: true },
-  { id: "kitchen",      title: "Kitchen",                Icon: CookingPotIcon, ready: false },
+  { id: "kitchen",      title: "Kitchen",                Icon: CookingPotIcon, to: "/login/kitchen", ready: true },
   { id: "conference",   title: "Conference Hall",        Icon: WarehouseIcon,  ready: false },
   { id: "laundry",      title: "Laundry",                Icon: TShirtIcon,     ready: false },
   { id: "recreation",   title: "Recreational Facilities", Icon: SwimmerIcon,   ready: false },

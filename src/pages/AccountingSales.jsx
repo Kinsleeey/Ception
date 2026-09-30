@@ -11,7 +11,7 @@ import { getAccountingSales } from "../api.js";
 // read the three totals off the strip. A sale is "unpaid" when it went on a
 // company account rather than being settled at the point of sale.
 
-const DEPARTMENTS = ["All", "Rooms", "Bar"];
+const DEPARTMENTS = ["All", "Rooms", "Bar", "Kitchen"];
 const STATUSES = ["All", "Paid", "Unpaid"];
 
 function naira(n) {
@@ -31,8 +31,15 @@ export default function AccountingSales() {
 
   const [department, setDepartment] = useState(params.get("department") || "All");
   const [status, setStatus] = useState(params.get("status") || "All");
-  const [from, setFrom] = useState(params.get("from") || "2026-08-09");
-  const [to, setTo] = useState(params.get("to") || "2026-08-12");
+  // Default to the current month, so a sale made today shows up without having
+  // to touch the dates. A drill-through from the Overview overrides this.
+  const [from, setFrom] = useState(
+    params.get("from") || new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+      .toISOString().slice(0, 10)
+  );
+  const [to, setTo] = useState(
+    params.get("to") || new Date().toISOString().slice(0, 10)
+  );
 
   const [viewing, setViewing] = useState(null);
 

@@ -18,9 +18,22 @@ import MyReportsModal from "../components/MyReportsModal.jsx";
 
 // The bartender's product list. The selected BAR lives here (lifted from the
 // sidebar) and drives everything: which drinks to fetch and which cart to show.
-export default function BartenderDashboard() {
-  // --- The single source of truth for "which bar" ---
-  const [location, setLocation] = useState("Bar 1");
+// Serves the bar AND the kitchen — they're the same job at a different
+// counter: tap products, build a cart, take payment, print a receipt.
+//
+// Props:
+//   locations -> the counters this screen can switch between. One entry means
+//                no sidebar, because there's nothing to switch to.
+//   module    -> what the header calls it; defaults to the active location
+export default function BartenderDashboard({
+  locations = ["Bar 1", "Bar 2", "Lounge"],
+  module,
+}) {
+  // --- The single source of truth for "which counter" ---
+  const [location, setLocation] = useState(locations[0]);
+  const multi = locations.length > 1;
+  // Where "Today's Activity" goes for this counter.
+  const activityPath = locations[0] === "Kitchen" ? "/kitchen-activity" : "/bar-activity";
 
   // Category filter. `categoryId` null = "All".
   const [categories, setCategories] = useState([]);
@@ -81,9 +94,12 @@ export default function BartenderDashboard() {
   }, []);
 
   // Load the category list once (for the filter pills).
+  // Scoped to this counter, so the bar doesn't show "Main Course" and the
+  // kitchen doesn't show "Spirits".
   useEffect(() => {
-    getBarCategories().then(setCategories).catch(() => setCategories([]));
-  }, []);
+    getBarCategories(location).then(setCategories).catch(() => setCategories([]));
+    setCategoryId(null);
+  }, [location]);
 
   // Load products whenever the bar or category changes.
   useEffect(() => {
@@ -191,7 +207,7 @@ export default function BartenderDashboard() {
   // wordmark reads once, at the top, as in every other module.
   return (
     <div className="bar-page">
-      <ModuleHeader module={location}>
+      <ModuleHeader module={module || location}>
             <button className="room-action-link" onClick={() => setStockModal("request")}>
               Request Stock
             </button>
@@ -220,13 +236,16 @@ export default function BartenderDashboard() {
 
             <span className="room-actions-row__divider" />
 
-            <Link className="room-action-link" to="/bar-activity">
+            {/* Each counter has its own sheet — the kitchen's day isn't the
+                bar's. */}
+            <Link className="room-action-link" to={activityPath}>
               Today's Activity
             </Link>
       </ModuleHeader>
 
       <div className="bar-body">
-        <BarSidebar activeLocation={location} onSelect={setLocation} />
+        {/* One counter means nothing to switch between, so no sidebar. */}
+        {multi && <BarSidebar activeLocation={location} onSelect={setLocation} />}
 
         <div className="main">
 

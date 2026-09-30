@@ -141,6 +141,7 @@ export default function AccountingOverview() {
 
         <td className="acct-td"><Drill value={r.rooms} to={sales("department=Rooms")} /></td>
         <td className="acct-td"><Drill value={r.bar} to={sales("department=Bar")} /></td>
+        <td className="acct-td"><Drill value={r.kitchen} to={sales("department=Kitchen")} /></td>
         <td className="acct-td acct-td--total">{naira(r.totalSales)}</td>
         <td className="acct-td acct-col--groupend">
           <Drill value={r.salesOwed} to={sales("status=Unpaid")} className="acct-drill--muted" />
@@ -280,7 +281,7 @@ export default function AccountingOverview() {
                 {/* Row 1 — the column groups */}
                 <tr className="acct-grouprow">
                   <th className="acct-th acct-sticky acct-group--plain" />
-                  <th className="acct-th acct-group--sales" colSpan={4}>SALES</th>
+                  <th className="acct-th acct-group--sales" colSpan={5}>SALES</th>
                   <th className="acct-th acct-group--plain">EXPENSES</th>
                   <th className="acct-th acct-group--profit">PROFIT</th>
                   <th className="acct-th acct-group--in" colSpan={5}>CASH IN</th>
@@ -297,6 +298,7 @@ export default function AccountingOverview() {
 
                   <Th label="ROOMS" k="rooms" className="acct-col--sales" />
                   <Th label="BAR" k="bar" className="acct-col--sales" />
+                  <Th label="KITCHEN" k="kitchen" className="acct-col--sales" />
                   <Th label="TOTAL SALES" k="totalSales" bold className="acct-col--salestotal" />
                   <Th label="SALES OWED" k="salesOwed" className="acct-col--sales acct-col--groupend" />
 
@@ -338,6 +340,7 @@ export default function AccountingOverview() {
                   <td className="acct-td acct-sticky acct-td--ytdlabel">{totalsLabel}</td>
                   <td className="acct-td">{naira(TOTALS.rooms)}</td>
                   <td className="acct-td">{naira(TOTALS.bar)}</td>
+                  <td className="acct-td">{naira(TOTALS.kitchen)}</td>
                   <td className="acct-td">{naira(TOTALS.totalSales)}</td>
                   <td className="acct-td acct-col--groupend">{naira(TOTALS.salesOwed)}</td>
                   <td className="acct-td acct-col--groupend">{naira(TOTALS.expenses)}</td>
@@ -371,7 +374,7 @@ export default function AccountingOverview() {
             <ul className="acct-summary__list">
               <li>
                 Total sales came to <strong>{naira(TOTALS.totalSales)}</strong>,
-                across rooms and the bar.
+                across rooms, the bar and the kitchen.
               </li>
               <li>
                 Running the hotel cost <strong>{naira(TOTALS.expenses)}</strong>,

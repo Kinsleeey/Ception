@@ -22,10 +22,15 @@ function todayISO() {
 // A bar's day: sales, stock in and out, and faults. Same shape as reception's
 // sheet — including the print layout with the handover signatures — because
 // it's the same job at a different counter.
-export default function BarActivity() {
+// Serves the bar AND the kitchen — the same sheet, filtered to one counter.
+//
+// Props:
+//   location -> which counter. Omit it and the URL decides, defaulting to Bar 1.
+export default function BarActivity({ location }) {
   const navigate = useNavigate();
   const { location: barParam } = useParams();
-  const barLocation = barParam || "Bar 1";
+  const barLocation = location || barParam || "Bar 1";
+  const isKitchen = barLocation === "Kitchen";
 
   const [date, setDate] = useState(todayISO());
   const [data, setData] = useState({ stats: {}, events: [] });
@@ -85,7 +90,7 @@ export default function BarActivity() {
               aria-label="Show activity for this date"
             />
             <button className="act-print" onClick={() => window.print()}>Print</button>
-            <button className="act-back" onClick={() => navigate("/bar")}>Close</button>
+            <button className="act-back" onClick={() => navigate(isKitchen ? "/kitchen" : "/bar")}>Close</button>
           </div>
         </div>
 
@@ -149,12 +154,12 @@ export default function BarActivity() {
         {/* Print only — the handover signatures. */}
         <div className="act-signoff">
           <div className="act-signoff__block">
-            <p className="act-signoff__name">OUTGOING BARTENDER</p>
+            <p className="act-signoff__name">{isKitchen ? "OUTGOING COOK" : "OUTGOING BARTENDER"}</p>
             <div className="act-signoff__line" />
             <p className="act-signoff__cap">Signature &amp; date</p>
           </div>
           <div className="act-signoff__block">
-            <p className="act-signoff__name">INCOMING BARTENDER</p>
+            <p className="act-signoff__name">{isKitchen ? "INCOMING COOK" : "INCOMING BARTENDER"}</p>
             <div className="act-signoff__line" />
             <p className="act-signoff__cap">Signature &amp; date (verified handover)</p>
           </div>
